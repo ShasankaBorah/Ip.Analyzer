@@ -1,0 +1,91 @@
+{
+  "_args": [
+    [
+      {
+        "raw": "google-protobuf",
+        "scope": null,
+        "escapedName": "google-protobuf",
+        "name": "google-protobuf",
+        "rawSpec": "",
+        "spec": "latest",
+        "type": "tag"
+      },
+      "/Users/nilutpol/Project/Protobuf"
+    ]
+  ],
+  "_from": "google-protobuf@latest",
+  "_id": "google-protobuf@3.3.0",
+  "_inCache": true,
+  "_location": "/google-protobuf",
+  "_nodeVersion": "6.10.0",
+  "_npmOperationalInternal": {
+    "host": "packages-18-east.internal.npmjs.com",
+    "tmp": "tmp/google-protobuf-3.3.0.tgz_1494007127821_0.2143705862108618"
+  },
+  "_npmUser": {
+    "name": "acozzette",
+    "email": "acozzette@gmail.com"
+  },
+  "_npmVersion": "4.3.0",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "google-protobuf",
+    "scope": null,
+    "escapedName": "google-protobuf",
+    "name": "google-protobuf",
+    "rawSpec": "",
+    "spec": "latest",
+    "type": "tag"
+  },
+  "_requiredBy": [
+    "#USER"
+  ],
+  "_resolved": "https://registry.npmjs.org/google-protobuf/-/google-protobuf-3.3.0.tgz",
+  "_shasum": "21c15ec2fbd57c236eb684d2e18bcaeca9759b77",
+  "_shrinkwrap": null,
+  "_spec": "google-protobuf",
+  "_where": "/Users/nilutpol/Project/Protobuf",
+  "author": {
+    "name": "Google Protocol Buffers Team"
+  },
+  "dependencies": {},
+  "description": "Protocol Buffers for JavaScript",
+  "devDependencies": {
+    "glob": "~6.0.4",
+    "google-closure-compiler": "~20160619.0.0",
+    "google-closure-library": "~20160125.0.0",
+    "gulp": "~3.9.0",
+    "jasmine": "~2.4.1"
+  },
+  "directories": {},
+  "dist": {
+    "shasum": "21c15ec2fbd57c236eb684d2e18bcaeca9759b77",
+    "tarball": "https://registry.npmjs.org/google-protobuf/-/google-protobuf-3.3.0.tgz"
+  },
+  "files": [
+    "google"
+  ],
+  "license": "BSD-3-Clause",
+  "main": "google-protobuf.js",
+  "maintainers": [
+    {
+      "name": "acozzette",
+      "email": "acozzette@gmail.com"
+    },
+    {
+      "name": "haberman",
+      "email": "jhaberman@gmail.com"
+    }
+  ],
+  "name": "google-protobuf",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/google/protobuf/tree/master/js"
+  },
+  "scripts": {
+    "test": "node ./node_modules/gulp/bin/gulp.js test"
+  },
+  "version": "3.3.0"
+}

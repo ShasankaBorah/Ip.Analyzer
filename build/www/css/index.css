@@ -1,0 +1,13 @@
+.small-font-content {
+    font-size: 10px;
+}
+
+input[type=checkbox]
+{
+  -webkit-appearance:checkbox;
+}
+
+.ct-series-a .ct-line {
+    stroke: #00ACAC;
+    stroke-width: 1px;
+}

@@ -1,0 +1,133 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="js/jquery-2.1.4.js"></script>
+    <script type="text/javascript" src="libs/materialize/js/materialize.js"></script>
+    <link type="text/css" rel="stylesheet" href="libs/materialize/css/materialize.css" media="screen,projection" />
+
+    <script type="text/javascript" src="chartist-js/chartist.js"></script>
+    <link type="text/css" rel="stylesheet" href="chartist-js/chartist.min.css">
+
+    <link type="text/css" rel="stylesheet" href="css/index.css">
+    <link type="text/css" rel="stylesheet" href="css/palette.css">
+
+    <link type="text/css " rel="stylesheet" href="libs/animate.css">
+
+    <script type="text/javascript" src="libs/moment.js"></script>
+    <script type="text/javascript" src="js/data-formatter.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
+    
+    <script type="text/javascript" src="js/datamaps.world.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            initialise();
+        });
+
+        function initialise() {
+            var host = window.location.host;
+            ws_command = new WebSocket("ws://" + host + "/ws/command");
+            ws_command.onmessage = function (evt) {
+                parse_command_reply(evt.data);
+            }
+
+            ws_message = new WebSocket("ws://" + host + "/ws/progress_message");
+            ws_message.onmessage = function (evt) {
+                parse_message(evt.data);
+            }
+
+            ws_message = new WebSocket("ws://" + host + "/ws/message");
+            ws_message.onmessage = function (evt) {
+                Materialize.toast(evt.data, 1000);
+            }
+
+
+
+
+            $('#top_nav').load("top_nav.html", function () {
+                $('#nav_ip_geolocate').addClass('red lighten-2');
+            });
+        }
+
+
+
+        var bombMap = new Datamap({
+            element: document.getElementById('container_map')/*,
+            scope: 'world',
+            geographyConfig: {
+                popupOnHover: false,
+                highlightOnHover: false
+            },
+            fills: {
+                'USA': '#1f77b4',
+                'RUS': '#9467bd',
+                'PRK': '#ff7f0e',
+                'PRC': '#2ca02c',
+                'IND': '#e377c2',
+                'GBR': '#8c564b',
+                'FRA': '#d62728',
+                'PAK': '#7f7f7f',
+                defaultFill: '#EDDC4E'
+            },
+            data: {
+                'RUS': { fillKey: 'RUS' },
+                'PRK': { fillKey: 'PRK' },
+                'PRC': { fillKey: 'PRC' },
+                'IND': { fillKey: 'IND' },
+                'GBR': { fillKey: 'GBR' },
+                'FRA': { fillKey: 'FRA' },
+                'PAK': { fillKey: 'PAK' },
+                'USA': { fillKey: 'USA' }
+            }*/
+        });
+
+        /*var bombs = [{
+            name: 'Joe 4',
+            radius: 25,
+            yield: 400,
+            country: 'USSR',
+            fillKey: 'RUS',
+            significance: 'First fusion weapon test by the USSR (not "staged")',
+            date: '1953-08-12',
+            latitude: 50.07,
+            longitude: 78.43
+        }, {
+            name: 'RDS-37',
+            radius: 40,
+            yield: 1600,
+            country: 'USSR',
+            fillKey: 'RUS',
+            significance: 'First "staged" thermonuclear weapon test by the USSR (deployable)',
+            date: '1955-11-22',
+            latitude: 50.07,
+            longitude: 78.43
+
+        }, {
+            name: 'Tsar Bomba',
+            radius: 75,
+            yield: 50000,
+            country: 'USSR',
+            fillKey: 'RUS',
+            significance: 'Largest thermonuclear weapon ever tested—scaled down from its initial 100 Mt design by 50%',
+            date: '1961-10-31',
+            latitude: 73.482,
+            longitude: 54.5854
+        }
+        ];*/
+
+    </script>
+</head>
+
+<body>
+    <div id="top_nav"></div>
+    <div class="row">
+        <div class="col s12">
+            <div id="container_map"></div>
+
+
+        </div>
+    </div>
+</body>
+
+</html>

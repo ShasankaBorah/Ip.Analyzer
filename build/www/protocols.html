@@ -1,0 +1,361 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Protocols Analysis</title>
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="js/jquery-2.1.4.js"></script>
+    <script type="text/javascript" src="libs/materialize/js/materialize.js"></script>
+    <link type="text/css" rel="stylesheet" href="libs/materialize/css/materialize.css" media="screen,projection" />
+    <script type="text/javascript" src="chartist-js/chartist.js"></script>
+    <link type="text/css" rel="stylesheet" href="chartist-js/chartist.min.css">
+    <link type="text/css" rel="stylesheet" href="css/index.css">
+    <link type="text/css" rel="stylesheet" href="css/palette.css">
+    <link type="text/css " rel="stylesheet" href="libs/animate.css">
+    <script type="text/javascript" src="libs/moment.js"></script>
+    <script type="text/javascript" src="js/data-formatter.js"></script>
+
+    <script type="text/javascript" src="libs/jsoneditor/jsoneditor.js"></script>
+    <link type="text/css" rel="stylesheet" href="libs/jsoneditor/jsoneditor.css">
+
+    <script type="text/javascript">
+        // globals variables
+        var json_editor;
+        $(document).ready(function () {
+            initialise();
+        });
+
+        function initialise() {
+            var host = window.location.host;
+            ws_command = new WebSocket("ws://" + host + "/ws/command");
+
+            onLoad_data_refresh();
+
+
+
+            ws_command.onmessage = function (evt) {
+                parse_command_reply(evt.data);
+            }
+            ws_message = new WebSocket("ws://" + host + "/ws/progress_message");
+            ws_message.onmessage = function (evt) {
+                parse_message(evt.data);
+            }
+
+
+            ws_message = new WebSocket("ws://" + host + "/ws/message");
+            ws_message.onmessage = function (evt) {
+                Materialize.toast(evt.data, 1000);
+            }
+
+            let element = document.getElementById('div_protocols');
+            json_editor = new JSONEditor(element, {
+                mode: 'view'
+            });
+
+            let table_fl_files = $('#table_fl_files tbody');
+            $(table_fl_files).delegate("tr", "click", function (e) {
+                var is_fl = true;
+                display_protocols($(e.currentTarget).children(":nth-child(1)").html(), is_fl);
+                $('#table_rl_files tr').removeClass('green lighten-2');
+                $('#table_fl_files tr').removeClass('green lighten-2');
+                $(e.currentTarget).addClass('green lighten-2');
+            });
+
+            let table_rl_files = $('#table_rl_files tbody');
+            $(table_rl_files).delegate("tr", "click", function (e) {
+                var is_fl = false;
+                display_protocols($(e.currentTarget).children(":nth-child(1)").html(), is_fl);
+                $('#table_fl_files tr').removeClass('green lighten-2');
+                $('#table_rl_files tr').removeClass('green lighten-2');
+                $(e.currentTarget).addClass('green lighten-2');
+            });
+
+            $('#top_nav').load("top_nav.html", function () {
+                $('#nav_protocols').addClass('red lighten-2');
+            });
+
+        } //initialise ends here
+
+        function parse_message(data) {
+            var obj = JSON.parse(data);
+            if (obj.type == "progress") {
+                $('#p_current_file').html(obj.filename);
+                $('#p_progress').html(numeral(obj.bytesRead).formatNumber() + '\\' + numeral(obj.fileSize).formatNumber() + ' (' + numeral(obj.bytesRead / obj.fileSize * 100).formatNumber(2) + '%)' + '(' + numeral(obj.seconds).formatNumber() + 'sec)');
+                if (obj.total_time != undefined) {
+                    $("#total_time_elapsed").html('Total Time Elapsed: ' + numeral(obj.total_time).formatNumber() + 'sec');
+                }
+            }
+            else if(obj.type == "read_port_progress")
+            {
+                $("#p_progress").html(obj.filename + ' ' + '<b>' + obj.wait + '</b>' );
+            }
+        }
+
+        function start_protocol_analysis() {
+            $('#btn_start_protocol_analysis').addClass('disabled');
+            $('#table_result_protocol tbody').empty();
+            ws_command.send("start_protocol_analysis");
+        }
+
+        function parse_command_reply(data) {
+            var obj = JSON.parse(data);
+            if (obj.type == "protocol_result") {
+                console.log("Analysis data received.");
+                display_analysis_data(obj);
+                $('#btn_start_protocol_analysis').removeClass('disabled');
+            } else if (obj.type == "load_from_db") {
+                console.log("protocol data from database received.");
+                from_database = true;
+                two_way_only = false;
+                display_analysis_data(JSON.parse(obj.data));
+                $('#btn_load_selected_dbs').removeClass('disabled');
+            } else if (obj.type == "protocol_database") {
+                console.log("Full protocol database files received.");
+                display_protocol_database(obj);
+
+            }
+        }
+
+        function onLoad_data_refresh() {
+            ws_command.onopen = function (evt) {
+                ws_command.send("get_protocol_database_all");
+            }
+        }
+
+        function display_analysis_data(obj) { //for icmp analysis
+            g_data = obj;
+            stream_data_file_result_body(obj);
+            initialise_stream_display();
+        }
+
+        // function displayPieChart(){
+        //     series = [];
+        //     labels = [];
+        //     for(let i = 0 ; i < obj.protocol_info.fl_file_info.length ; i++)
+        //     {
+
+        //     }
+        // }
+
+        function stream_data_file_result_body(obj) { //function to show number of files read , fl files , rl files, fl file path , rl file path
+            // set d_num_files here from json
+            $('#file_result tbody').empty();
+
+            if (obj.analysis_info[0]) {
+                var d_num = obj.analysis_info[0].number_of_files_read;
+                document.getElementById("d_num_files").innerHTML = d_num;
+
+                var dtr = '<tr>';
+                dtr += '<td>'
+                dtr += obj.analysis_info[0].filePathFL;
+                dtr += '</td>'
+
+                dtr += '<td>'
+                dtr += obj.analysis_info[0].filePathRL;
+                dtr += '</td>'
+
+                dtr += '<td>'
+                dtr += obj.analysis_info[0].CreatedAt;
+                dtr += '</td>'
+
+                if (obj.analysis_info[0].FL_Files != undefined) {
+                    dtr += '<td>'
+                    for (j = 0; j < obj.analysis_info[0].FL_Files.length; j++) {
+                        dtr += obj.analysis_info[0].FL_Files[j].pcapFileFl + ' ( '+ obj.analysis_info[0].FL_Files[j].size + ' ) ' + '<br>';
+                    }
+                    dtr += '</td>'
+                } else {
+                    dtr += '<td>'
+                    dtr += 'No_Files'
+                    dtr += '</td>'
+                }
+
+                if (obj.analysis_info[0].RL_Files != undefined) {
+                    dtr += '<td>'
+                    for (j = 0; j < obj.analysis_info[0].RL_Files.length; j++) {
+                        dtr += obj.analysis_info[0].RL_Files[j].pcapFileRl + ' ( '+ obj.analysis_info[0].RL_Files[j].size + ' ) ' + '<br>';
+                    }
+                    dtr += '</td>'
+                } else {
+                    dtr += '<td>'
+                    dtr += 'No_Files'
+                    dtr += '</td>'
+                }
+
+
+                dtr += '</tr>';
+                $('#file_result tbody').append(dtr);
+            }
+        }
+
+        function initialise_stream_display() {
+            if (g_data == undefined) return;
+            table_data = g_data.protocol_info;
+            display_stream_data();
+        }
+
+        function display_stream_data() { //to display the data in the main table
+            let table_ = $('#table_fl_files tbody');
+            let table_rl = $('#table_rl_files tbody');
+
+            table_.empty();
+            let data = g_data.protocol_info;
+            // if (table_data == undefined || !(table_data instanceof Array)) return;
+            if (data.fl_info != undefined) {
+                for (i = 0; i < data.fl_info.length; i++) {
+                    var str = '<tr>';
+                    str += '<td>' + (i + 1) + '</td>';
+                    str += '<td>' + data.fl_info[i].freq_folder_name + '</td>';
+                    str += '</tr>';
+                    table_.append(str);
+                }
+            }
+            if (data.rl_info != undefined) {
+                for (i = 0; i < data.rl_info.length; i++) {
+                    var str = '<tr>';
+                    str += '<td>' + (i + 1) + '</td>';
+                    str += '<td>' + data.rl_info[i].freq_folder_name + '</td>';
+                    str += '</tr>';
+                    table_rl.append(str);
+                }
+            }
+
+        }
+
+        function display_protocols(idx, is_fl) {
+            if (is_fl) {
+                json_editor.set(g_data.protocol_info.fl_info[idx - 1].proto_info);
+                json_editor.expandAll();
+            }
+            else {
+                json_editor.set(g_data.protocol_info.rl_info[idx - 1].proto_info);
+                json_editor.expandAll();
+            }
+
+        }
+
+
+        function display_protocol_database(obj) {
+            if (obj.data == undefined) return;
+
+            $('#protocol_table_database_files tbody').empty(); //data to be printed in the file result body
+
+            $.each(obj.data, function (i, item) {
+                $('#select_db_list').append($('<option>', {
+                    value: item,
+                    text: item
+                }));
+            });
+
+            $('#select_db_list').material_select();
+        }
+
+        function load_selected_db() {
+            $('#btn_load_selected_dbs').addClass('disbaled');
+            let selected_db = $('#select_db_list :selected').val();
+            ws_command.send("load_selected_protocol_db&" + selected_db.toString());
+        }
+
+
+    </script>
+</head>
+
+<body>
+    <div id="top_nav"></div>
+    <div class="row">
+        <br>
+        <br>
+
+        <div class=row id="div_protocol_analysis">
+            <div class="row">
+                <div class="col s12">
+                    <div class="row">
+                        <button class="btn col s2" id="btn_start_protocol_analysis" onclick="start_protocol_analysis()">PROTOCOL Analysis</button>
+                        <button class="btn col s1" onclick="load_all_protocol_streams()">Reset</button>
+                        <div class="input-field col s3">
+                            <select id="select_db_list"></select>
+                            <label>Available Databases</label>
+                        </div>
+                        <button class="btn col s1" id="btn_load_selected_dbs" onclick="load_selected_db()">Load Selected File</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <P id="p_current_file"></P>
+                <p id="p_progress"></p>
+            </div>
+
+            <div>
+                <p id="total_time_elapsed"></p>
+            </div>
+
+
+            <div class="row">
+                <h6>Number of Files Read :
+                    <span id="d_num_files"></span>
+                </h6>
+            </div>
+
+
+            <div class="row">
+                <div class="col s12">
+                    <table id="file_result">
+                        <thead>
+                            <tr>
+                                <th>FL File Path</th>
+                                <th>RL File Path</th>
+                                <th>Created At</th>
+                                <th>FL Files Read</th>
+                                <th>RL FIles Read</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row">
+                <button class="btn" id="btn_table_result_prev" onclick="load_table_result_prev()">Prev</button>
+                <button class="btn" id="btn_table_result_next" onclick="load_table_result_next()">Next</button>
+                <p id="p_table_result_info"></p>
+            </div>
+            <div class="row">
+                <div class="col s4">
+                    <div class="row">
+                        <div class="col s12">
+                            <table id="table_fl_files" class="bordered highlight">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>FL Folders</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div class="col s12">
+                            <table id="table_rl_files" class="bordered highlight">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>RL Folders</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col s8" id="div_protocols"></div>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+
+</html>

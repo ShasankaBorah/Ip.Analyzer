@@ -1,0 +1,373 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Configuration</title>
+
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="js/jquery-2.1.4.js"></script>
+
+    <script type="text/javascript" src="libs/materialize/js/materialize.js"></script>
+    <link type="text/css" rel="stylesheet" href="libs/materialize/css/materialize.css" media="screen,projection" />
+
+    <script type="text/javascript" src="chartist-js/chartist.js"></script>
+    <link type="text/css" rel="stylesheet" href="chartist-js/chartist.min.css">
+
+    <link type="text/css" rel="stylesheet" href="css/index.css">
+    <link type="text/css" rel="stylesheet" href="css/palette.css">
+
+    <link type="text/css " rel="stylesheet" href="libs/animate.css">
+
+    <script type="text/javascript" src="libs/moment.js"></script>
+    <script type="text/javascript" src="js/data-formatter.js"></script>
+
+    <script type="text/javascript">
+        // Declare global variables here
+        var ws_command;
+        var ws_messages;
+
+        var g_data;
+
+        var table_result;
+
+        $(document).ready(function () {
+            var host = window.location.host;
+            ws_command = new WebSocket("ws://" + host + "/ws/command");
+            ws_command.onopen = function (evt) {
+                ws_command.send("get_configuration&");
+            }
+
+            ws_command.onmessage = function (evt) {
+                parse_command_reply(evt.data);
+            }
+
+            ws_message = new WebSocket("ws://" + host + "/ws/message");
+            ws_message.onmessage = function (evt) {
+                Materialize.toast(evt.data, 1000);
+            }
+
+            $('#top_nav').load("top_nav.html", function () {
+                $('#nav_config').addClass('red lighten-2');
+            });
+
+
+            $('#mycheckboxFL').on('click', function () { //to select FL folders
+                $(this).closest('#fl_folders_table').find('tbody :checkbox')
+                    .prop('checked', this.checked)
+                    .closest('tr').toggleClass('selected', this.checked);
+            });
+
+            $('#mycheckboxRL').on('click', function () { //to select RL folders
+                $(this).closest('#rl_folders_table').find('tbody :checkbox')
+                    .prop('checked', this.checked)
+                    .closest('tr').toggleClass('selected', this.checked);
+            });
+        });
+
+
+
+        function set_configuration() {
+            var userInputFL = document.getElementById("userFLInputPath").value;
+            var userInputRL = document.getElementById("userRLInputPath").value;
+            var params = {};
+            params.fl_path = userInputFL;
+            params.rl_path = userInputRL;
+            params.fl_folders = [];
+            params.rl_folders = [];
+
+
+            $('#fl_folders_table tbody tr td').each(function (index) { // loop to insert the values that has been checked in the fl folder table
+                if (index % 2 == 0 && $(this).find("input[type=checkbox]").prop('checked')) {
+                    {
+                        params.fl_folders.push($(this).next().html());
+                    }
+                }
+            });
+
+            $('#rl_folders_table tbody tr td').each(function (index) { // loop to insert the values that has been checked in the rl folder table
+                if (index % 2 == 0 && $(this).find("input[type=checkbox]").prop("checked")) {
+                    params.rl_folders.push($(this).next().html());
+                }
+            });
+
+            var str = JSON.stringify(params);
+            ws_command.send("set_configuration&" + str);
+        }
+
+        function load_all_pcap_folders() //to load the fl and rl pcap folders when clicked the button load pcap folders
+        {
+            $('#pcap_file_list').addClass('disabled');
+            var userInputFLPath = document.getElementById("userFLInputPath").value;
+            var userInputRLPath = document.getElementById("userRLInputPath").value;
+            ws_command.send("load_pcap_folders&" + userInputFLPath + "&" + userInputRLPath);
+
+        }
+
+        function get_database() {
+            $('#btn_get_database').addClass('disabled');
+            ws_command.send("get_database");
+        }
+
+        function parse_command_reply(data) {
+            var obj = JSON.parse(data);
+
+            if (obj.fl_path != undefined) {
+                console.log("Configuration received.");
+                // fill the gui with the obj content
+                $('#userFLInputPath').val(obj.fl_path);
+                $('#userRLInputPath').val(obj.rl_path);
+            } else if (obj.type == "pcap_folders") {
+                console.log("pcap folder list");
+                display_pcap_folders(data);
+                $('#btn_pcap_file_list').removeClass('disabled');
+                Materialize.toast("Received folder list.", 1000);
+            } //else if (obj.type == "database") {
+            //     console.log("database received.");
+            //     display_database(obj);
+            //     $('#btn_get_database').removeClass('disabled');
+            // }
+
+        }
+
+        function display_pcap_folders(data) { //to show fl and rl folders in the table
+            var obj = JSON.parse(data);
+
+            $('#fl_folders_table tbody').empty();
+            if (obj.fl_folders != undefined) {
+                
+                for (i = 0; i < obj.fl_folders.length; i++) {
+                    var pcapfl = '<tr>';
+                    pcapfl += '<td>' + '<input type="checkbox" id="checkfl_' + i + '"/>' + '<label for="checkfl_' + i + '"></label>' + '</td>';
+                    pcapfl += '<td>' + obj.fl_folders[i] + '</td>';
+                    pcapfl += '</tr>';
+                    $('#fl_folders_table tbody').append(pcapfl);
+                }
+            }
+
+            $('#rl_folders_table tbody').empty();
+            if (obj.rl_folders != undefined) {
+                
+                for (i = 0; i < obj.rl_folders.length; i++) {
+                    var pcaprl = '<tr>';
+                    pcaprl += '<td>' + '<input type="checkbox" id="checkrl_' + i + '"/>' + '<label for="checkrl_' + i + '"></label>' + '</td>';
+                    pcaprl += '<td>' + obj.rl_folders[i] + '</td>';
+                    pcaprl += '</tr>';
+                    $('#rl_folders_table tbody').append(pcaprl);
+                }
+            }
+
+        }
+
+        // function display_database(obj) //for displaying data after loading the json from database		
+        // {
+        //     if (obj.pcap_data == undefined && obj.icmp_data == undefined && obj.tcp_data == undefined && obj.dns_data == undefined && obj.protocol_data == undefined) return;
+
+        //     $('#pcap_table_database tbody').empty(); //data to be printed in the file result body
+
+        //     var pcp = '';
+        //     for (i = 0; i < obj.pcap_data.length; i++) {
+        //         pcp += '<tr>';
+        //         pcp += '<td>' + obj.pcap_data[i] + '</td>';
+        //         pcp += '<td><button class="btn" id="btn_db_' + i + '" onclick="select_individual_pcap_database($(this).parent().parent())">Select Database</button></td>';
+        //         pcp += '</tr>';
+        //     }
+        //     $('#pcap_table_database tbody').append(pcp);
+
+        //     $('#icmp_table_database tbody').empty(); //data to be printed in the file result body
+
+        //     var icp = '';
+        //     for (i = 0; i < obj.icmp_data.length; i++) {
+        //         icp += '<tr>';
+        //         icp += '<td>' + obj.icmp_data[i] + '</td>';
+        //         icp += '<td><button class="btn" id="btn_db_' + i + '" onclick="select_individual_icmp_database($(this).parent().parent())">Select Database</button></td>';
+        //         icp += '</tr>';
+        //     }
+        //     $('#icmp_table_database tbody').append(icp);
+
+        //     $('#tcp_table_database tbody').empty(); //data to be printed in the file result body
+
+        //     var tcp = '';
+        //     for (i = 0; i < obj.tcp_data.length; i++) {
+        //         tcp += '<tr>';
+        //         tcp += '<td>' + obj.tcp_data[i] + '</td>';
+        //         tcp += '<td><button class="btn" id="btn_db_' + i + '" onclick="select_individual_tcp_database($(this).parent().parent())">Select Database</button></td>';
+        //         tcp += '</tr>';
+        //     }
+        //     $('#tcp_table_database tbody').append(tcp);
+
+        //     $('#dns_table_database tbody').empty(); //data to be printed in the file result body
+
+        //     var dns = '';
+        //     for (i = 0; i < obj.dns_data.length; i++) {
+        //         dns += '<tr>';
+        //         dns += '<td>' + obj.dns_data[i] + '</td>';
+        //         dns += '<td><button class="btn" id="btn_db_' + i + '" onclick="select_individual_dns_database($(this).parent().parent())">Select Database</button></td>';
+        //         dns += '</tr>';
+        //     }
+        //     $('#dns_table_database tbody').append(dns);
+
+        //     $('#protocol_table_database tbody').empty(); //data to be printed in the file result body
+        //     var ptl = '';
+        //     for (i = 0; i < obj.protocol_data.length; i++) {
+        //         ptl += '<tr>';
+        //         ptl += '<td>' + obj.protocol_data[i] + '</td>';
+        //         ptl += '<td><button class="btn" id="btn_db_' + i + '" onclick="select_individual_protocol_database($(this).parent().parent())">Select Database</button></td>';
+        //         ptl += '</tr>';
+        //     }
+        //     $('#protocol_table_database tbody').append(ptl);
+
+        // }
+
+        // function select_individual_pcap_database(tr_row) {
+        //     ws_command.send("select_individual_pcap_database&" + tr_row.children(":nth-child(1)").html());
+        // }
+
+        // function select_individual_icmp_database(tr_row) {
+        //     ws_command.send("select_individual_icmp_database&" + tr_row.children(":nth-child(1)").html());
+        // }
+
+        // function select_individual_tcp_database(tr_row) {
+        //     ws_command.send("select_individual_tcp_database&" + tr_row.children(":nth-child(1)").html());
+        // }
+
+        // function select_individual_dns_database(tr_row) {
+        //     ws_command.send("select_individual_dns_database&" + tr_row.children(":nth-child(1)").html());
+        // }
+
+        // function select_individual_protocol_database(tr_row) {
+        //     ws_command.send("select_individual_protocol_database&" + tr_row.children(":nth-child(1)").html());
+        // }
+    </script>
+</head>
+
+<body>
+    <div id="top_nav"></div>
+    <div class="row">
+        <div class="row">
+            <div class="col s6">
+                <input type="text" id="userFLInputPath" value="E:\Shasanka\5W_KuloHor_07082017_PCAP\5W_KuloHor_FL" placeholder="Input the path to FL files with escape sequence"
+                />
+                <input type="text" id="userRLInputPath" value="E:\Shasanka\5W_KuloHor_07082017_PCAP\RL" placeholder="Input the path to RL files with escape sequence"
+                />
+                <!-- <input type="text" id="userFLInputPath" value="H:\5W_KuloHor_07082017_PCAP\5W_KuloHor_FL" placeholder="Input the path to FL files with escape sequence" />
+                <input type="text" id="userRLInputPath" value="H:\5W_KuloHor_07082017_PCAP\RL" placeholder="Input the path to RL files with escape sequence" /> -->
+                <button class="btn" id="btn_pcap_file_list" onclick="load_all_pcap_folders()">Show PCAP Folder</button>
+                <button class="btn" id="btn_set_configuration" onclick="set_configuration()">Set Configuration</button>
+                <button class="btn" id="btn_get_database" onclick="get_database()">Get Database</button>
+            </div>
+
+            <!-- to show FL and RL folders -->
+            <div class="col s6">
+                <div class="row">
+                    <div class="col s6">
+                        <table id="fl_folders_table">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" id="mycheckboxFL" />
+                                        <label for="mycheckboxFL"></label>
+                                    </th>
+                                    <th>FL Folders</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="col s6">
+                        <table id="rl_folders_table">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" id="mycheckboxRL" />
+                                        <label for="mycheckboxRL"></label>
+                                        <th>RL Folders</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- <div class="row">
+            <div class="col s2">
+                <div>PCAP</div>
+                
+                <table id="pcap_table_database" class="highlight">
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="col s2">
+                <div>DNS</div>
+               
+                <table id="dns_table_database" class="highlight">
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="col s2">
+                <div>PROTOCOL</div>
+                
+                <table id="protocol_table_database" class="highlight">
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="col s2">
+                <div>ICMP</div>
+             
+                <table id="icmp_table_database" class="highlight">
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="col s2">
+                <div>TCP</div>
+                <table id="tcp_table_database" class="highlight">
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div> -->
+
+        <div class="row">
+            <P id="p_current_file"></P>
+            <p id="p_progress"></p>
+        </div>
+    </div>
+</body>
+
+</html>
