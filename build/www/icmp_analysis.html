@@ -596,7 +596,7 @@
                 $('#average_round_time').html(avg);
             }
             else {
-                $('#average_round_time').html((avg.hours() > 0 ? avg.hours() + ' hrs ' : '') + (avg.minutes() > 0 ? avg.minutes() + ' mins ' : '') + (avg.seconds() > 0 ? avg.seconds() + ' seconds ' : '') + (avg.milliseconds() + ' msecs'));
+                $('#average_round_time').html((avg.hours() > 0 ? avg.hours() + ' hrs ' : '') + (avg.minutes() > 0 ? avg.minutes() + ' mins ' : '') + (avg.seconds() > 0 ? avg.seconds() + ' seconds ' : '') + parseInt(avg.milliseconds())  + ' msecs' );
             }
 
 
