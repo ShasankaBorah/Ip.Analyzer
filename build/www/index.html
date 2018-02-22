@@ -476,6 +476,7 @@
 
 
     function load_table_result_next() {
+      $('#btn_reset').removeClass('disabled');
       if (two_way_only == true) {
         if (limit != max_size) {
           next_pairs = limit;
@@ -546,12 +547,14 @@
 
     function load_2_way_streams() {
       $('#btn_load_two_way').addClass('disabled');
+      $('#btn_reset').removeClass('disabled');
       start = 0;
       two_way_only = true;
       max_size = g_data_pcap_pairs.length;
       limit = Math.min(max_size, limit);
       funct_to_load_two_way_pairs(start, limit);
       $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
+
 
     }
 
@@ -636,18 +639,20 @@
         table_result.append(pcap_pair_str);
 
       }
-      $('#btn_load_two_way').removeClass('disabled');
+      // 
     }
 
     function load_all_streams() {
+      $('#btn_load_two_way').removeClass('disabled');
       $('#btn_reset').addClass('disabled');
+
       start = 0;
       limit = rows_per_page;
       two_way_only = false;
       max_size = table_data.length;
       display_stream_data(start, limit);
       $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
-      $('#btn_reset').removeClass('disabled');
+     
     }
 
     function display_pcap_database(obj) //for displaying data after loading the json from database
