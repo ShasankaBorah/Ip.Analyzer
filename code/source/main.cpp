@@ -64,11 +64,40 @@ void callback(const std::string& uri, const std::string& str)
 
 	if(2 == tokens.size())
 	{
+		/*start normal pcap analysis*/
+
+
 		if (tokens.at(0).compare("get_configuration") == 0)
 		{
 			// send the config
 			// get jsonnlohmann format of the config and send it
 			server_instance.send_data("/ws/command", config.getJSON());
+		}
+		else if(tokens.at(0).compare("start_analysis") == 0)
+		{
+			bool check = false;
+			if(tokens.at(1).compare("true") == 0)
+			{
+				check = true;
+			}
+			
+			filesToAnalyze.initialize(check);
+			filesToAnalyze.start_analysis();
+			std::string result = filesToAnalyze.printToJSON();
+			server_instance.send_data("/ws/command", result);
+		}
+		else if(tokens.at(0).compare("start_icmp_analysis") == 0)
+		{
+			bool check = false;
+			if (tokens.at(1).compare("true") == 0)
+			{
+				check = true;
+			}
+			icmp_analyze.initialize(check);
+			icmp_analyze.start_analysis();
+
+			std::string result = icmp_analyze.printToJSON();
+			server_instance.send_data("/ws/command", result);
 		}
 		else if (tokens.at(0).compare("set_configuration") == 0)
 		{
@@ -222,22 +251,22 @@ void callback(const std::string& uri, const std::string& str)
 		* ends here
 		********************************************/
 
-        else if (tokens.at(0).compare("start_analysis") == 0) /*for pcap analysis*/
-        {
-            filesToAnalyze.initialize();
-            filesToAnalyze.start_analysis();
-            std::string result = filesToAnalyze.printToJSON();
-            server_instance.send_data("/ws/command", result);
-        }		
-        else if (tokens.at(0).compare("start_icmp_analysis") == 0) /*for icmp analysis*/
-        {
-            icmp_analyze.initialize();
-            icmp_analyze.start_analysis();
+        //else if (tokens.at(0).compare("start_analysis") == 0) /*for pcap analysis*/
+        //{
+        //    //filesToAnalyze.initialize();
+        //    filesToAnalyze.start_analysis();
+        //    std::string result = filesToAnalyze.printToJSON();
+        //    server_instance.send_data("/ws/command", result);
+        //}		
+        //else if (tokens.at(0).compare("start_icmp_analysis") == 0) /*for icmp analysis*/
+        //{
+        //    icmp_analyze.initialize();
+        //    icmp_analyze.start_analysis();
 			
 
-            std::string result =  icmp_analyze.printToJSON();
-            server_instance.send_data("/ws/command", result);
-        }
+        //    std::string result =  icmp_analyze.printToJSON();
+        //    server_instance.send_data("/ws/command", result);
+        //}
 		else if(tokens.at(0).compare("start_tcp_analysis") == 0) /*for tcp analysis*/
 		{
 			tcp_analyze.initialize();
@@ -375,15 +404,15 @@ std::string load_pcap_folder_list(std::string fl_path, std::string rl_path)
 
 std::string get_database_data_config() /*to get database in the configuration nav bar*/
 {
-	jsonnlohmann j_json = jsonnlohmann::object();
-	std::stringstream JSon;
-	string linesRead;
-	vector<string> string_array;
-	std::ifstream read_icmp_json_file("icmp_database.json");
-	std::ifstream read_pcap_json_file("pcap_database.json");
-	std::ifstream read_tcp_json_file("tcp_database.json");
-	std::ifstream read_protocol_json_file("protocol_database.json");
-	std::ifstream read_dns_json_file("dns_database.json");
+	jsonnlohmann									j_json = jsonnlohmann::object();
+	std::stringstream								JSon;
+	string											linesRead;
+	vector<string>									string_array;
+	std::ifstream									read_icmp_json_file("icmp_database.json");
+	std::ifstream									read_pcap_json_file("pcap_database.json");
+	std::ifstream									read_tcp_json_file("tcp_database.json");
+	std::ifstream									read_protocol_json_file("protocol_database.json");
+	std::ifstream									read_dns_json_file("dns_database.json");
 	
 	
 	//data for overall jsonnlohmann data to be generated to send back to gui

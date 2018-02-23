@@ -49,6 +49,7 @@
     var multicast = /^(2(2[4-9]|3[0-9]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))$/;
 
     var countryMap = {}; //to store country name with count of packets from that country
+    var excludePrivateIp = false;
 
 
     $(document).ready(function () {
@@ -85,6 +86,9 @@
         $('#nav_index').addClass('red lighten-2');
       });
 
+      
+     
+
       $('select').material_select();
 
 
@@ -92,10 +96,22 @@
 
 
     function start_analysis() {
+      // $('#exclude_private_ip').on('click', function () { //to check if the exclude private ip checkbox is checked or unchecked
+      //           if($(this).prop('checked', this.checked))
+      //           {
+      //               excludePrivateIp = true;
+      //           }
+
+      //       });
+
+      if(  $('#exclude_private_ip').get(0).checked)
+      {
+        excludePrivateIp = true;
+      }
       $('#btn_start_analysis').addClass('disabled');
       $('#table_result tbody').empty();
 
-      ws_command.send("start_analysis");
+      ws_command.send("start_analysis&" + excludePrivateIp);
     }
 
     function load_selected_db() {
@@ -721,6 +737,15 @@
             <h6 class="col s1">Number of Files Read :
               <span id="d_num_files"></span>
             </h6>
+            <div class="col s2">
+              <form>
+                  <p>
+                    <input class="with-gap" name="ex_Private_ip" checked="checked" type="checkbox" id="exclude_private_ip"/>
+                    <label for="exclude_private_ip">Exclude Private Ip</label>
+                  </p>
+              </form>
+            </div>
+
 
           </div>
 

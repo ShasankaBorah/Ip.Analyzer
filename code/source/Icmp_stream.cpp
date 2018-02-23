@@ -11,11 +11,12 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include <json.hpp>
 
 namespace ptree = boost::property_tree;
 using namespace std;
 
-#include <json.hpp>
+
 using jsonnlohmann = nlohmann::json;
 
 Icmp_stream::Icmp_stream(void)

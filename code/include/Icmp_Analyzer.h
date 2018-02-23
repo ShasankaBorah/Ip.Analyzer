@@ -106,6 +106,7 @@ private:
 	jsonnlohmann j_icmp_streams = jsonnlohmann::object(); //json object
     void									store_database();
 	int process(std::pair<std::string, std::string> item, bool is_fl);
+	bool isChecked;
 
 
 public:
@@ -113,7 +114,7 @@ public:
 	~Icmp_Analyzer();
 	
 	std::string			printToJSON();
-	void				initialize();
+	void				initialize(bool);
 	int					start_analysis();
 };
 

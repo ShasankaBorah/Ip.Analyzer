@@ -119,13 +119,14 @@ private:
 	jsonnlohmann								j_root = jsonnlohmann::object();  
     void										store_database();
 	float										totalSecondsElapsed = 0;
+	bool										isChecked;
 	int process(std::pair<std::string, std::string> item, bool is_fl); // main processing function
 	
 public:	
 	pcapPackAnalyzer(std::string);  //constructor
 	pcapPackAnalyzer(); //deafut constructor
 	~pcapPackAnalyzer();
-	void			initialize();//resets all the values
+	void			initialize(bool);//resets all the values
 	int				start_analysis();
 	void			setNumberOfFiles(int);
 	std::string		printToJSON();	

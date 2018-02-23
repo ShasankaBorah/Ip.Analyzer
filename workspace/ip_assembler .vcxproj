@@ -34,6 +34,7 @@
     <ClCompile Include="..\code\source\Dns_ip_stream.cpp" />
     <ClCompile Include="..\code\source\Icmp_Analyzer.cpp" />
     <ClCompile Include="..\code\source\Icmp_stream.cpp" />
+    <ClCompile Include="..\code\source\IgnorePrivateIp.cpp" />
     <ClCompile Include="..\code\source\Ip_Address_to_country_mapper.cpp" />
     <ClCompile Include="..\code\source\Ip_stream.cpp" />
     <ClCompile Include="..\code\source\main.cpp" />
@@ -53,6 +54,7 @@
     <ClInclude Include="..\code\include\Dns_ip_stream.h" />
     <ClInclude Include="..\code\include\Icmp_Analyzer.h" />
     <ClInclude Include="..\code\include\Icmp_stream.h" />
+    <ClInclude Include="..\code\include\IgnorePrivateIp.h" />
     <ClInclude Include="..\code\include\Ip_Address_to_country_mapper.h" />
     <ClInclude Include="..\code\include\Ip_stream.h" />
     <ClInclude Include="..\code\include\Protocol_analyzer.h" />

@@ -44,8 +44,9 @@ Icmp_Analyzer::~Icmp_Analyzer()
 {
 }
 
-void Icmp_Analyzer::initialize()
+void Icmp_Analyzer::initialize(bool isExPrivateChecked)
 {
+	isChecked = isExPrivateChecked;
 	icmp_streams_vector.clear();
 	NumberOfFilesRead = 0;
 	sizePcapFl.clear();
@@ -199,6 +200,19 @@ int Icmp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 
 				memcpy((u_char*)&icmp_Daddr.s_addr, (u_char*)&ip_hdr->ip_destaddr, 4);
 				string dst(inet_ntoa(icmp_Daddr));
+
+				if (true == isChecked)
+				{
+					Ip_Address_to_country_mapper compareIp;
+
+					bool srcPrivateIp = compareIp.stringComp(src);
+					bool dstPrivateIp = compareIp.stringComp(dst);
+
+					if (srcPrivateIp == false || dstPrivateIp == false)
+					{
+						continue;
+					}
+				}
 
 				Icmp_stream new_icmp_streams(src, dst);
 

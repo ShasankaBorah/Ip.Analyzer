@@ -41,8 +41,9 @@ pcapPackAnalyzer::~pcapPackAnalyzer()
 {
 }
 
-void pcapPackAnalyzer::initialize()
+void pcapPackAnalyzer::initialize(bool isExPrivateChecked)
 {
+	isChecked = isExPrivateChecked;
 	NumberOfFilesRead = 0;
 	streams.clear();
 	/*fl_files_.clear();
@@ -203,6 +204,21 @@ int pcapPackAnalyzer::process(std::pair<std::string, std::string> item, bool is_
 
 			memcpy((u_char*)&Daddr.s_addr, (u_char*)&ip_hdr->ip_destaddr, 4);
 			string dst(inet_ntoa(Daddr));
+
+
+			if(true == isChecked)
+			{
+				Ip_Address_to_country_mapper compareIp;
+
+				bool srcPrivateIp = compareIp.stringComp(src);
+				bool dstPrivateIp = compareIp.stringComp(dst);
+
+				if (srcPrivateIp == false || dstPrivateIp == false)
+				{
+					continue;
+				}
+			}
+			
 
 			stream newStream(src, dst);
 

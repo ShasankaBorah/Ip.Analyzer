@@ -5,3 +5,12 @@
 *.log
 *.idb
 *.pdb
+workspace/packages/*
+*.iobj
+*.ilk
+*.exe
+code/source/IgnorePrivateIp.cpp
+code/include/IgnorePrivateIp.h
+workspace/.vs/ip_assembler/v14/.suo
+*.db
+*.opendb
