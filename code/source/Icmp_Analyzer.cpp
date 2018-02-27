@@ -46,7 +46,7 @@ Icmp_Analyzer::~Icmp_Analyzer()
 
 void Icmp_Analyzer::initialize(bool isExPrivateChecked)
 {
-	isChecked = isExPrivateChecked;
+	isChecked = isExPrivateChecked; // is exclude private ip checked
 	icmp_streams_vector.clear();
 	NumberOfFilesRead = 0;
 	sizePcapFl.clear();

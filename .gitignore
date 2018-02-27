@@ -14,3 +14,5 @@ code/include/IgnorePrivateIp.h
 workspace/.vs/ip_assembler/v14/.suo
 *.db
 *.opendb
+*.ipdb
+*.txt

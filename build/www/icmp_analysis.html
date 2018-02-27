@@ -135,16 +135,28 @@
         }
 
         function display_analysis_data(obj) { //for icmp analysis
+            
+
+            if(obj.streams == undefined)
+            {
+                Materialize.toast('No public IP data available !!' , 4000 );
+                return;
+
+            }
+
             g_data = obj;
             two_way_table_data = obj.streams;
 
             var j = 0;
-            for (i = 0; i < two_way_table_data.length; i++) {
-                if ((two_way_table_data[i].folders_FL instanceof Array) && (two_way_table_data[i].folders_RL instanceof Array)) {
-                    g_data_pair_only[j] = two_way_table_data[i];
-                    j++;
+            if (obj.streams != undefined) {
+                for (i = 0; i < two_way_table_data.length; i++) {
+                    if ((two_way_table_data[i].folders_FL instanceof Array) && (two_way_table_data[i].folders_RL instanceof Array)) {
+                        g_data_pair_only[j] = two_way_table_data[i];
+                        j++;
+                    }
                 }
             }
+
 
             stream_data_file_result_body(obj);
             initialise_stream_display();
@@ -284,6 +296,59 @@
                 }
                 str += count + '</td>';
 
+                let roundTimeArray = [];
+
+                let minMax = calculateMinMaxTime(stream.sequence_array);
+                // let sequenceArrayLength = stream.sequence_array.length;
+                // for(let i = 0; i < sequenceArrayLength ; i++)
+                // {
+                //     let request = stream.sequence_array[i].request;
+                //     let reply = stream.sequence_array[i].reply;
+
+                //     if(request == true && reply == true)
+                //     {
+                //         let requestTime = stream.sequence_array[i].reqts;
+                //         let replyTime = stream.sequence_array[i].repts;
+
+                //         let timeDiff = replyTime - requestTime;
+                //         roundTimeArray.push(timeDiff);
+                //     }
+                // }
+
+
+                // let minimumTime = Number.MAX_VALUE;
+                // let maximumTime = 0;
+                // let total = 0;
+                // let avg;
+                // if(roundTimeArray.length > 0)
+                // {
+                //     for(let i = 0 ; i<roundTimeArray.length ; i++)
+                //     {
+                //         minimumTime = (roundTimeArray[i] < minimumTime) ? roundTimeArray[i] : minimumTime;
+                //         maximumTime = (roundTimeArray[i] > maximumTime) ? roundTimeArray[i] : maximumTime;
+                //         total += roundTimeArray[i];
+                //     }
+                //     avg = moment.duration(total / roundTimeArray.length);
+                // }
+                // else{
+                //     minimumTime = "NA";
+                //     maximumTime = "NA";
+                //     avg = "NA";
+                // }
+
+
+                str += '<td>';
+                str += minMax[0];
+                str += '</td>';
+
+                str += '<td>';
+                str += minMax[1];
+                str += '</td>';
+
+                str += '<td>';
+                str += minMax[2]
+                str += '</td>';
+
                 str += '</tr>';
                 table_result.append(str);
             }
@@ -372,8 +437,20 @@
                 }
                 pair_str += count + '</td>';
 
-                // pair_str += '<td>';
-                // if(streams.)
+
+                let pairMinMax = calculateMinMaxTime(stream.sequence_array);
+
+                pair_str += '<td>';
+                pair_str += pairMinMax[0]
+                pair_str += '</td>';
+
+                pair_str += '<td>';
+                pair_str += pairMinMax[1]
+                pair_str += '</td>';
+
+                pair_str += '<td>';
+                pair_str += pairMinMax[2]
+                pair_str += '</td>';
 
                 pair_str += '</tr>';
                 table_result.append(pair_str);
@@ -566,8 +643,8 @@
             $('#total_unreachable').html(unreachableCount);
             $('#total_timeexceeded').html(timeExceededCount);
 
-            // let min = Math.min(...roundTsArray);
-            // let max = Math.max(...roundTsArray);
+
+            calculateMinMaxTime(roundTsArray);
 
             var total = 0;
             var minTime = Number.MAX_VALUE;
@@ -594,8 +671,12 @@
 
             //const arrAvg =  roundTsArray.reduce((a,b) => a + b, 0) / roundTsArray.length
 
-            $('#min_round_time').html(minTime);
-            $('#max_round_time').html(maxTime);
+            minTime = moment.duration(minTime);
+            maxTime = moment.duration(maxTime);
+            $('#min_round_time').html((minTime.hours() > 0 ? minTime.hours() + ' hrs ' : '') + (minTime.minutes() > 0 ? minTime.minutes() + ' mins ' : '') + (minTime.seconds() > 0 ? minTime.seconds() + ' seconds ' : '') + parseInt(minTime.milliseconds()) + ' msecs');
+            $('#max_round_time').html((maxTime.hours() > 0 ? maxTime.hours() + ' hrs ' : '') + (maxTime.minutes() > 0 ? maxTime.minutes() + ' mins ' : '') + (maxTime.seconds() > 0 ? maxTime.seconds() + ' seconds ' : '') + parseInt(maxTime.milliseconds()) + ' msecs');
+            // $('#min_round_time').html(minTime);
+            // $('#max_round_time').html(maxTime);
             if (avg == 'NA') {
                 $('#average_round_time').html(avg);
             }
@@ -646,6 +727,57 @@
             }
             $('#table_sequence tbody').append(str);
         }
+
+
+        function calculateMinMaxTime(sequenceArray) {
+            let timeArray = [];
+            let roundTime = [];
+            let sequenceArrayLength = sequenceArray.length;
+            for (let i = 0; i < sequenceArrayLength; i++) {
+                let request = sequenceArray[i].request;
+                let reply = sequenceArray[i].reply;
+
+                if (request == true && reply == true) {
+                    let requestTime = sequenceArray[i].reqts;
+                    let replyTime = sequenceArray[i].repts;
+
+                    let timeDiff = replyTime - requestTime;
+                    roundTime.push(timeDiff);
+                }
+            }
+
+
+            let minimumTime = Number.MAX_VALUE;
+            let maximumTime = 0;
+            let total = 0;
+            let avg;
+            if (roundTime.length > 0) {
+                for (let i = 0; i < roundTime.length; i++) {
+                    minimumTime = (roundTime[i] < minimumTime) ? roundTime[i] : minimumTime;
+                    maximumTime = (roundTime[i] > maximumTime) ? roundTime[i] : maximumTime;
+                    total += roundTime[i];
+                }
+                avg = moment.duration(total / roundTime.length);
+            }
+            else {
+                minimumTime = "NA";
+                maximumTime = "NA";
+                avg = "NA";
+            }
+
+            timeArray[0] = minimumTime;
+            timeArray[1] = maximumTime;
+            timeArray[2] = avg;
+
+            return timeArray;
+
+
+
+
+        }
+
+
+
 
         function get_icmp_database_all() {
             $('#btn_get_icmp_database_all').addClass('disabled');
@@ -813,15 +945,18 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Source IP</th>
+                                <th>Src IP</th>
                                 <th>Src Country</th>
-                                <th>Destination IP</th>
-                                <th>Dest Country</th>
-                                <th>Source To Dest.</th>
-                                <th>Dest. To Source</th>
+                                <th>Dst IP</th>
+                                <th>Dst Country</th>
+                                <th>Src To Dst</th>
+                                <th>Dst To Src</th>
                                 <th>FL Frequencies</th>
                                 <th>RL Frequencies</th>
                                 <th>Total Pairs</th>
+                                <th>Min. Time</th>
+                                <th>Max. Time</th>
+                                <th>Avg. Time</th>
                             </tr>
                         </thead>
                         <tbody></tbody>

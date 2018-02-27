@@ -318,9 +318,9 @@ std::string getJSON_string_from_jsonC(jsonnlohmann json)
 
 std::string load_pcap_folder_list(std::string fl_path, std::string rl_path) 
 {
-	pcap_to_json = new std::ofstream("pcap_folder_list.txt"); 
+	pcap_to_json				= new std::ofstream("pcap_folder_list.txt"); 
 
-	jsonnlohmann j_root = jsonnlohmann::object();
+	jsonnlohmann j_root					= jsonnlohmann::object();
 	vector<boost::filesystem::path> fl_folder_vector;
 	vector<boost::filesystem::path> rl_folder_vector;
 
