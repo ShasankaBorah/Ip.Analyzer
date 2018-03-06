@@ -167,7 +167,7 @@ int Icmp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 			break;
 		bytesRead += header->len;
 
-		uint64_t ts = (static_cast<uint64_t>(header->ts.tv_sec) * 1000) + (header->ts.tv_usec / 1000); // msecs
+		uint64_t ts = (static_cast<uint64_t>(header->ts.tv_sec) * 1000) + (header->ts.tv_usec / 1000); // millisecs
 
 		perc = (bytesRead / fileSize) * 100;
 		if (perc > (double)next_perc)

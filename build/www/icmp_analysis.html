@@ -39,9 +39,6 @@
         var one_seven_2_subnet = /^172\.(1[6-9]|2[0-9]|3[0-1])\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))$/;
         var reserved_ip = /^100\.(6[4-9]|[7-9][0-9]|1([0-1][0-9]|2[0-7]))\.(0\.(0[ -9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))|([1-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5])))$/;
         var excludePrivateIp;
-
-        //var check = false;
-
         var table_result;
 
         $(document).ready(function () {
@@ -53,8 +50,6 @@
             ws_command = new WebSocket("ws://" + host + "/ws/command");
 
             onLoad_data_refresh();
-
-
 
             ws_command.onmessage = function (evt) {
                 parse_command_reply(evt.data);
@@ -109,7 +104,6 @@
         }
 
         function parse_message(data) {
-
             var obj = JSON.parse(data);
 
             if (obj.type == "progress") {
@@ -138,11 +132,9 @@
 
         function display_analysis_data(obj) { //for icmp analysis
 
-
             if (obj.streams == undefined) {
                 Materialize.toast('No public IP data available !!', 4000);
                 return;
-
             }
 
             g_data = obj;
@@ -157,7 +149,6 @@
                     }
                 }
             }
-
 
             stream_data_file_result_body(obj);
             initialise_stream_display();
@@ -213,9 +204,6 @@
                 $('#file_result tbody').append(dtr);
             }
         }
-
-
-
 
         function initialise_stream_display() {
             if (g_data == undefined) return;
@@ -546,12 +534,38 @@
             $('#total_transactions').html(totalTransactions);
 
             // to show the total number of pairs with req and rep == true
-            let count = 0;
+
+            let count = 0; //pair count
             let unreachableCount = 0;
             let timeExceededCount = 0;
+            let countReq1 = 0; //request count for request to reply
+            let countRep1 = 0; //reply count for request to reply
+            //let reqToRepPercentage = 0;
+            // let repToReqPercentage = 0;
+            // let countReq2 = 0; //request count for reply to request
+            // let countRep2 =0; //reply count for reply to request
             for (let i = 0; i < totalTransactions; i++) {
                 let req = stream.sequence_array[i].request;
                 let rep = stream.sequence_array[i].reply;
+
+                if (stream.sequence_array[i].request == true) {
+                    countReq1++;
+
+                }
+                if (stream.sequence_array[i].reply == true) {
+                    countRep1++;
+                }
+
+                //  if(stream.sequence_array[i].reply == true)
+                //  {
+                //      countRep2++;
+                //      if(stream.sequence_array[i].request == true)
+                //      {
+                //          countReq2++;
+                //      }
+                //  }
+
+
 
 
                 if (req == true && rep == true) {
@@ -564,11 +578,16 @@
                     timeExceededCount++;
 
                 }
+
             }
+            // reqToRepPercentage = (countRep1/countReq1) * 100;
+            //repToReqPercentage = (countReq2/countRep2) * 100;
 
             $('#total_pairs').html(count);
             $('#total_unreachable').html(unreachableCount);
             $('#total_timeexceeded').html(timeExceededCount);
+            $('#_request').html(countReq1);
+            $('#_reply').html(countRep1);
 
 
             let minMax = calculateMinMaxTime(stream.sequence_array);
@@ -898,6 +917,19 @@
                             Total TimeExceeded :
                             <span id="total_timeexceeded"></span>
                         </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col s6">
+                            Request :
+                            <span id="_request"></span>
+                        </div>
+
+                        <div class="col s6">
+                           Reply :
+                            <span id="_reply"></span>
+                        </div>
+
                     </div>
 
                     <!-- to show min round time , max round tiem and average of round time -->
