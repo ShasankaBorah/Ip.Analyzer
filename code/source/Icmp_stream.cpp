@@ -96,6 +96,10 @@ void Icmp_stream::update_icmp_pair_info(int sequence_received, int request_type_
 	// add one more var to icmp_pair for unsupported type and set if that value comes. normally it shoudln't
 	/*icmp_pair newPair;*/
 
+	if(sequence_received == 9984)
+	{
+		std::cout << "hello"<<std::endl;
+	}
 	icmp_pair item;
 	item.sequence_number = sequence_received;
 	item.reqTimeStamp = 0;							//request timestamp
@@ -116,7 +120,7 @@ void Icmp_stream::update_icmp_pair_info(int sequence_received, int request_type_
 		break;
 	case 0:
 		item.reply = true;
-		item.reqTimeStamp = ts;
+		item.repTimeStamp = ts;
 		break;
 	case 3: //dst unreachable
 		item.destUnreachable = true;
@@ -162,6 +166,7 @@ void Icmp_stream::update_icmp_pair_info(int sequence_received, int request_type_
 						int diff = repSec - reqSec;
 						if (diff <= 60)
 						{
+							flag = true;
 							it.reply = true;
 							it.repTimeStamp = ts;
 						}
@@ -178,6 +183,7 @@ void Icmp_stream::update_icmp_pair_info(int sequence_received, int request_type_
 						int diff = repSec - reqSec;
 						if(diff <= 60)
 						{
+							flag = true;
 							it.request = true;
 							it.reqTimeStamp = ts;
 						}

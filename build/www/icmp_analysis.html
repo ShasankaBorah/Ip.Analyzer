@@ -127,6 +127,8 @@
             }
             $('#btn_start_icmp_analysis').addClass('disabled');
             $('#table_result_icmp tbody').empty();
+            $('#table_sequence_2 tbody').empty();
+            $('#table_sequence tbody').empty();
             ws_command.send("start_icmp_analysis&" + excludePrivateIp);
         }
 
@@ -272,35 +274,45 @@
                 }
                 str += '</td>';
 
-                str += '<td>';
-                let count = 0;
-                for (let k = 0; k < stream.sequence_array.length; ++k) {
-                    totalCount = stream.sequence_array.length;
-                    if (stream.sequence_array[k].request == true && stream.sequence_array[k].reply == true) {
-                        count += 1;
+                if (stream.sequence_array != undefined) {
+                    str += '<td>';
+                    let count = 0;
+                    for (let k = 0; k < stream.sequence_array.length; ++k) {
+                        totalCount = stream.sequence_array.length;
+                        if (stream.sequence_array[k].request == true && stream.sequence_array[k].reply == true) {
+                            count += 1;
+                        }
+
                     }
+                    str += count + '</td>';
 
+                    let roundTimeArray = [];
+
+                    let minMax = calculateMinMaxTime(stream.sequence_array);
+
+                    str += '<td>';
+                    str += minMax[0];
+                    str += '</td>';
+
+                    str += '<td>';
+                    str += minMax[1];
+                    str += '</td>';
+
+                    str += '<td>';
+                    str += minMax[2]
+                    str += '</td>';
+
+                    str += '</tr>';
+                    table_result.append(str);
                 }
-                str += count + '</td>';
-
-                let roundTimeArray = [];
-
-                let minMax = calculateMinMaxTime(stream.sequence_array);
-
-                str += '<td>';
-                str += minMax[0];
-                str += '</td>';
-
-                str += '<td>';
-                str += minMax[1];
-                str += '</td>';
-
-                str += '<td>';
-                str += minMax[2]
-                str += '</td>';
-
-                str += '</tr>';
-                table_result.append(str);
+                else {
+                    str += '<td>' + 'NA' + '</td>';
+                    str += '<td>' + 'NA' + '</td>';
+                    str += '<td>' + 'NA' + '</td>';
+                    str += '<td>' + 'NA' + '</td>';
+                    str += '</tr>';
+                    table_result.append(str);
+                }
             }
         }
 
@@ -529,59 +541,323 @@
             $('#p_seq_src').html(stream.SrcIp);
             $('#p_seq_dst').html(stream.DstIp);
 
+            /****************************************** To show transaction details************************************************************/
+            let totalTransactions = 0;
+            let defaultTypes = 0;  //includes ttl exceeded , host unreachable and any other values 
+
             // to show total number of transaction
-            let totalTransactions = stream.sequence_array.length;
-            $('#total_transactions').html(totalTransactions);
+            if (stream.unsuported_or_default != undefined && stream.sequence_array != undefined) {
+                totalTransactions = stream.sequence_array.length;
+                defaultTypes = stream.unsuported_or_default.length;
+                $('#total_transactions').html(totalTransactions + defaultTypes);
+            }
+            else if (stream.sequence_array != undefined && stream.unsuported_or_default == undefined) {
+                totalTransactions = stream.sequence_array.length;
+                $('#total_transactions').html(totalTransactions);
+            }
+            else if (stream.unsuported_or_default != undefined && stream.sequence_array == undefined) {
+                totalTransactions = stream.unsuported_or_default.length;
+                $('#total_transactions').html(totalTransactions);
+            }
 
-            // to show the total number of pairs with req and rep == true
+            /************************************************************************************************************************************/
 
-            let count = 0; //pair count
+
+
+            /***********************************************************************************************************************************/
+            /* to show the total number of pairs with req and rep == true ,  total unreachable , total timexceeded . request count , reply count*/
+            if (stream.sequence_array != undefined && stream.unsuported_or_default == undefined) {
+                showSequenceData(stream.sequence_array);
+            }
+            else if (stream.sequence_array == undefined && stream.unsuported_or_default != undefined) {
+                showUnsupportedData(stream.unsuported_or_default);
+            }
+            else if (stream.sequence_array != undefined && stream.unsuported_or_default != undefined) {
+                showBothSeqDataUnsupportData(stream.sequence_array, stream.unsuported_or_default);
+            }
+
+            /************************************************************************************************************************************/
+
+
+
+        }
+
+        function showBothSeqDataUnsupportData(seqData, unsupportData) {
+            let pairCount = 0; //pair count
             let unreachableCount = 0;
             let timeExceededCount = 0;
             let countReq1 = 0; //request count for request to reply
             let countRep1 = 0; //reply count for request to reply
-            //let reqToRepPercentage = 0;
-            // let repToReqPercentage = 0;
-            // let countReq2 = 0; //request count for reply to request
-            // let countRep2 =0; //reply count for reply to request
-            for (let i = 0; i < totalTransactions; i++) {
-                let req = stream.sequence_array[i].request;
-                let rep = stream.sequence_array[i].reply;
 
-                if (stream.sequence_array[i].request == true) {
+            for (let i = 0; i < seqData.length; i++) {
+                let req = seqData[i].request;
+                let rep = seqData[i].reply;
+
+                if (seqData[i].request == true) {
                     countReq1++;
-
                 }
-                if (stream.sequence_array[i].reply == true) {
+                if (seqDataata[i].reply == true) {
                     countRep1++;
                 }
-
-                //  if(stream.sequence_array[i].reply == true)
-                //  {
-                //      countRep2++;
-                //      if(stream.sequence_array[i].request == true)
-                //      {
-                //          countReq2++;
-                //      }
-                //  }
-
-
-
 
                 if (req == true && rep == true) {
                     count++;
                 }
-                if (stream.sequence_array[i].dstUnreachable != false) {
+                if (seqData[i].dstUnreachable != false) {
                     unreachableCount++;
                 }
-                else if (stream.sequence_array[i].dstUnreachable != false) {
+                else if (seqData[i].ttlExceeded != false) {
+                    timeExceededCount++;
+                }
+            }
+
+
+            for (let i = 0; i < unsupportData.length; i++) {
+                let req = unsupportData[i].request;
+                let rep = unsupportData[i].reply;
+
+                if (unsupportData[i].request == true) {
+                    countReq1++;
+                }
+                if (unsupportData[i].reply == true) {
+                    countRep1++;
+                }
+
+                if (req == true && rep == true) {
+                    count++;
+                }
+                if (unsupportData[i].dstUnreachable != false) {
+                    unreachableCount++;
+                }
+                else if (unsupportData[i].ttlExceeded != false) {
+                    timeExceededCount++;
+
+                }
+            }
+
+            $('#total_pairs').html(pairCount);
+            $('#total_unreachable').html(unreachableCount);
+            $('#total_timeexceeded').html(timeExceededCount);
+            $('#_request').html(countReq1);
+            $('#_reply').html(countRep1);
+            $('#min_round_time').html('NA');
+            $('#max_round_time').html('NA');
+            $('#average_round_time').html('NA');
+
+            $('#table_sequence tbody').empty();
+            var str = "";
+            for (k = 0; k < seqData.length; k++) {
+                var req = seqData[k].request;
+                var rep = seqData[k].reply;
+                if (req == true && rep == true) {
+                    let repTime = seqData[k].repts;
+                    let reqTime = seqData[k].reqts;
+
+                    let diffInTime = moment.duration(repTime - reqTime);
+
+                    str += '<tr class="green">';
+                    str += '<td>' + (k + 1) + '</td>';
+                    str += '<td>' + seqData[k].sequence_no + '</td>';
+                    str += '<td>' + seqData[k].reqts + '</td>';
+                    str += '<td>' + seqData[k].repts + '</td>';
+                    str += '<td>' + (diffInTime.hours() > 0 ? diffInTime.hours() + ' hrs ' : '') + (diffInTime.minutes() > 0 ? diffInTime.minutes() + ' mins ' : '') + (diffInTime.seconds() > 0 ? diffInTime.seconds() + ' seconds ' : '') + (diffInTime.milliseconds() + ' msecs') + '</td>';
+                }
+                else {
+                    str += '<tr>';
+                    str += '<td>' + (k + 1) + '</td>';
+                    str += '<td>' + seqData[k].sequence_no + '</td>';
+
+                    if (req == true) {
+                        str += '<td>' + seqData[k].reqts + '</td>';
+                    }
+                    else {
+                        str += '<td>' + "NA" + '</td>';
+                    }
+
+                    if (rep == true) {
+                        str += '<td>' + seqData[k].repts + '</td>';
+                    }
+                    else {
+                        str += '<td>' + "NA" + '</td>';
+                    }
+
+                    str += '<td>' + "NA" + '</td>';
+                }
+                str += '</tr>';
+            }
+            $('#table_sequence tbody').append(str);
+
+
+            $('#table_sequence_2 tbody').empty();
+            var str_ = "";
+            for (k = 0; k < defaultData.length; k++) {
+                var req = defaultData[k].request;
+                var rep = defaultData[k].reply;
+                if (req == true && rep == true) {
+                    let repTime = defaultData[k].repts;
+                    let reqTime = defaultData[k].reqts;
+
+                    let diffInTime = moment.duration(repTime - reqTime);
+
+                    str_ += '<tr class="green">';
+                    str_ += '<td>' + (k + 1) + '</td>';
+                    str_ += '<td>' + defaultData[k].sequence_no + '</td>';
+                    str_ += '<td>' + defaultData[k].reqts + '</td>';
+                    str_ += '<td>' + defaultData[k].repts + '</td>';
+                    str_ += '<td>' + (diffInTime.hours() > 0 ? diffInTime.hours() + ' hrs ' : '') + (diffInTime.minutes() > 0 ? diffInTime.minutes() + ' mins ' : '') + (diffInTime.seconds() > 0 ? diffInTime.seconds() + ' seconds ' : '') + (diffInTime.milliseconds() + ' msecs') + '</td>';
+                }
+                else {
+                    str_ += '<tr>';
+                    str_ += '<td>' + (k + 1) + '</td>';
+                    str_ += '<td>' + defaultData[k].sequence_no + '</td>';
+
+                    if (req == true) {
+                        str_ += '<td>' + defaultData[k].reqts + '</td>';
+                    }
+                    else {
+                        str_ += '<td>' + "NA" + '</td>';
+                    }
+
+                    if (rep == true) {
+                        str_ += '<td>' + defaultData[k].repts + '</td>';
+                    }
+                    else {
+                        str_ += '<td>' + "NA" + '</td>';
+                    }
+
+                    str_ += '<td>' + "NA" + '</td>';
+                }
+                str_ += '</tr>';
+            }
+            $('#table_sequence_2 tbody').append(str_);
+
+
+
+
+
+
+
+
+
+        }
+
+        function showUnsupportedData(defaultData) {
+            let pairCount = 0; //pair count
+            let unreachableCount = 0;
+            let timeExceededCount = 0;
+            let countReq1 = 0; //request count for request to reply
+            let countRep1 = 0; //reply count for request to reply
+
+            for (let i = 0; i < defaultData.length; i++) {
+                let req = defaultData[i].request;
+                let rep = defaultData[i].reply;
+
+                if (defaultData[i].request == true) {
+                    countReq1++;
+                }
+                if (defaultData[i].reply == true) {
+                    countRep1++;
+                }
+
+                if (req == true && rep == true) {
+                    count++;
+                }
+                if (defaultData[i].dstUnreachable != false) {
+                    unreachableCount++;
+                }
+                else if (defaultData[i].ttlExceeded != false) {
                     timeExceededCount++;
 
                 }
 
             }
-            // reqToRepPercentage = (countRep1/countReq1) * 100;
-            //repToReqPercentage = (countReq2/countRep2) * 100;
+
+            $('#total_pairs').html(pairCount);
+            $('#total_unreachable').html(unreachableCount);
+            $('#total_timeexceeded').html(timeExceededCount);
+            $('#_request').html(countReq1);
+            $('#_reply').html(countRep1);
+            $('#min_round_time').html('NA');
+            $('#max_round_time').html('NA');
+            $('#average_round_time').html('NA');
+
+
+
+            $('#table_sequence_2 tbody').empty();
+            var str = "";
+            for (k = 0; k < defaultData.length; k++) {
+                var req = defaultData[k].request;
+                var rep = defaultData[k].reply;
+                if (req == true && rep == true) {
+                    let repTime = defaultData[k].repts;
+                    let reqTime = defaultData[k].reqts;
+
+                    let diffInTime = moment.duration(repTime - reqTime);
+
+                    str += '<tr class="green">';
+                    str += '<td>' + (k + 1) + '</td>';
+                    str += '<td>' + defaultData[k].sequence_no + '</td>';
+                    str += '<td>' + defaultData[k].reqts + '</td>';
+                    str += '<td>' + defaultData[k].repts + '</td>';
+                    str += '<td>' + (diffInTime.hours() > 0 ? diffInTime.hours() + ' hrs ' : '') + (diffInTime.minutes() > 0 ? diffInTime.minutes() + ' mins ' : '') + (diffInTime.seconds() > 0 ? diffInTime.seconds() + ' seconds ' : '') + (diffInTime.milliseconds() + ' msecs') + '</td>';
+                }
+                else {
+                    str += '<tr>';
+                    str += '<td>' + (k + 1) + '</td>';
+                    str += '<td>' + defaultData[k].sequence_no + '</td>';
+
+                    if (req == true) {
+                        str += '<td>' + defaultData[k].reqts + '</td>';
+                    }
+                    else {
+                        str += '<td>' + "NA" + '</td>';
+                    }
+
+                    if (rep == true) {
+                        str += '<td>' + defaultData[k].repts + '</td>';
+                    }
+                    else {
+                        str += '<td>' + "NA" + '</td>';
+                    }
+
+                    str += '<td>' + "NA" + '</td>';
+                }
+                str += '</tr>';
+            }
+            $('#table_sequence_2 tbody').append(str);
+
+        }
+
+        function showSequenceData(sequence_data) {
+            let count = 0; //pair count
+            let unreachableCount = 0;
+            let timeExceededCount = 0;
+            let countReq1 = 0; //request count for request to reply
+            let countRep1 = 0; //reply count for request to reply
+
+            for (let i = 0; i < sequence_data.length; i++) {
+                let req = sequence_data[i].request;
+                let rep = sequence_data[i].reply;
+
+                if (sequence_data[i].request == true) {
+                    countReq1++;
+                }
+                if (sequence_data[i].reply == true) {
+                    countRep1++;
+                }
+
+                if (req == true && rep == true) {
+                    count++;
+                }
+                if (sequence_data[i].dstUnreachable != false) {
+                    unreachableCount++;
+                }
+                else if (sequence_data[i].ttlExceeded != false) {
+                    timeExceededCount++;
+
+                }
+
+            }
 
             $('#total_pairs').html(count);
             $('#total_unreachable').html(unreachableCount);
@@ -590,7 +866,7 @@
             $('#_reply').html(countRep1);
 
 
-            let minMax = calculateMinMaxTime(stream.sequence_array);
+            let minMax = calculateMinMaxTime(sequence_data);
 
             let minTime = moment.duration(minMax[0]);
             let maxTime = moment.duration(minMax[1]);
@@ -606,38 +882,39 @@
                 $('#average_round_time').html((avg.hours() > 0 ? avg.hours() + ' hrs ' : '') + (avg.minutes() > 0 ? avg.minutes() + ' mins ' : '') + (avg.seconds() > 0 ? avg.seconds() + ' seconds ' : '') + parseInt(avg.milliseconds()) + ' msecs');
             }
 
-
+            $('#table_sequence_2 tbody').empty();
+            $('#table_sequence tbody').empty();
             var str = "";
-            for (k = 0; k < stream.sequence_array.length; k++) {
-                var req = stream.sequence_array[k].request;
-                var rep = stream.sequence_array[k].reply;
+            for (k = 0; k < sequence_data.length; k++) {
+                var req = sequence_data[k].request;
+                var rep = sequence_data[k].reply;
                 if (req == true && rep == true) {
-                    let repTime = stream.sequence_array[k].repts;
-                    let reqTime = stream.sequence_array[k].reqts;
+                    let repTime = sequence_data[k].repts;
+                    let reqTime = sequence_data[k].reqts;
 
                     let diffInTime = moment.duration(repTime - reqTime);
 
                     str += '<tr class="green">';
                     str += '<td>' + (k + 1) + '</td>';
-                    str += '<td>' + stream.sequence_array[k].sequence_no + '</td>';
-                    str += '<td>' + stream.sequence_array[k].reqts + '</td>';
-                    str += '<td>' + stream.sequence_array[k].repts + '</td>';
+                    str += '<td>' + sequence_data[k].sequence_no + '</td>';
+                    str += '<td>' + sequence_data[k].reqts + '</td>';
+                    str += '<td>' + sequence_data[k].repts + '</td>';
                     str += '<td>' + (diffInTime.hours() > 0 ? diffInTime.hours() + ' hrs ' : '') + (diffInTime.minutes() > 0 ? diffInTime.minutes() + ' mins ' : '') + (diffInTime.seconds() > 0 ? diffInTime.seconds() + ' seconds ' : '') + (diffInTime.milliseconds() + ' msecs') + '</td>';
                 }
                 else {
                     str += '<tr>';
                     str += '<td>' + (k + 1) + '</td>';
-                    str += '<td>' + stream.sequence_array[k].sequence_no + '</td>';
+                    str += '<td>' + sequence_data[k].sequence_no + '</td>';
 
                     if (req == true) {
-                        str += '<td>' + stream.sequence_array[k].reqts + '</td>';
+                        str += '<td>' + sequence_data[k].reqts + '</td>';
                     }
                     else {
                         str += '<td>' + "NA" + '</td>';
                     }
 
                     if (rep == true) {
-                        str += '<td>' + stream.sequence_array[k].repts + '</td>';
+                        str += '<td>' + sequence_data[k].repts + '</td>';
                     }
                     else {
                         str += '<td>' + "NA" + '</td>';
@@ -649,7 +926,6 @@
             }
             $('#table_sequence tbody').append(str);
         }
-
 
         function calculateMinMaxTime(sequenceArray) { //calculate min max , avg and return the values in an array
             let timeArray = [];
@@ -881,145 +1157,134 @@
                     </table>
                 </div>
                 <div id="result"> </div>
-                <div class="col s5">
-                    <div class="row">
-                        <div class="col s6">
-                            <div>Source IP Address:
-                                <span id="p_seq_src" />
+                <div class="row">
+                    <div class="col s5">
+                        <div class="row">
+                            <div class="row">
+                                <div class="col s6">
+                                    <div>Source IP Address:
+                                        <span id="p_seq_src" />
+                                    </div>
+                                </div>
+                                <div class="col s6">
+                                    <div>Destination IP Address:
+                                        <span id="p_seq_dst" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <!-- div for total transactions -->
+                                <div class="col s6"> Total Transactions:
+                                    <span id="total_transactions"></span>
+                                </div>
+
+                                <!-- div to show the pairs in the clicked ip  -->
+                                <div class="col s6"> Total Pairs:
+                                    <span id="total_pairs"></span>
+                                </div>
+                            </div>
+
+                            <!-- to show unreachable count and time exceeded count -->
+                            <div class="row">
+                                <div class="col s6">
+                                    Unreachable Count :
+                                    <span id="total_unreachable"></span>
+                                </div>
+                                <div class="col s6">
+                                    TimeExceeded Count:
+                                    <span id="total_timeexceeded"></span>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col s6">
+                                    Request :
+                                    <span id="_request"></span>
+                                </div>
+
+                                <div class="col s6">
+                                    Reply :
+                                    <span id="_reply"></span>
+                                </div>
+
+                            </div>
+
+                            <!-- to show min round time , max round tiem and average of round time -->
+                            <div class="row">
+                                <div class="col s4">
+                                    Min. Round Time :
+                                    <span id="min_round_time"></span>
+                                </div>
+                                <div class="col s4">
+                                    Max. Round Time :
+                                    <span id="max_round_time"></span>
+                                </div>
+                                <div class="col s4">
+                                    Average Round Time :
+                                    <span id="average_round_time"></span>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <ul id="tabs-swipe-demo" class="tabs">
+                            <li class="tab col s3">
+                                <a class="active" href="#test-swipe-1">Supported Type</a>
+                            </li>
+                            <li class="tab col s3">
+                                <a href="#test-swipe-2">Unsupported Type</a>
+                            </li>
+                        </ul>
+
+
+                        <div class="row" id="test-swipe-1">
+                            <div class="row" style="overflow-y: scroll; height:800px;">
+                                <div class="col s12">
+                                    <table id="table_sequence" class="bordered highlight">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Sequence Number</th>
+                                                <th>Request(Msec)</th>
+                                                <th>Reply(Msec)</th>
+                                                <th>Round Time(Msec)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
-                        <div class="col s6">
-                            <div>Destination IP Address:
-                                <span id="p_seq_dst" />
+
+
+                        <div class="row" id="test-swipe-2">
+                            <div class="row" style="overflow-y: scroll; height:800px;">
+                                <div class="col s12">
+                                    <table id="table_sequence_2" class="bordered highlight">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Sequence Number</th>
+                                                <th>Request(Msec)</th>
+                                                <th>Reply(Msec)</th>
+                                                <th>Round Time(Msec)</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row">
-                        <!-- div for total transactions -->
-                        <div class="col s6"> Total Transactions:
-                            <span id="total_transactions"></span>
-                        </div>
-
-                        <!-- div to show the pairs in the clicked ip  -->
-                        <div class="col s6"> Total Pairs:
-                            <span id="total_pairs"></span>
-                        </div>
-                    </div>
-
-                    <!-- to show unreachable count and time exceeded count -->
-                    <div class="row">
-                        <div class="col s6">
-                            Total Unreachable :
-                            <span id="total_unreachable"></span>
-                        </div>
-                        <div class="col s6">
-                            Total TimeExceeded :
-                            <span id="total_timeexceeded"></span>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col s6">
-                            Request :
-                            <span id="_request"></span>
-                        </div>
-
-                        <div class="col s6">
-                           Reply :
-                            <span id="_reply"></span>
-                        </div>
 
                     </div>
-
-                    <!-- to show min round time , max round tiem and average of round time -->
-                    <div class="row">
-                        <div class="col s4">
-                            Min. Round Time :
-                            <span id="min_round_time"></span>
-                        </div>
-                        <div class="col s4">
-                            Max. Round Time :
-                            <span id="max_round_time"></span>
-                        </div>
-                        <div class="col s4">
-                            Average Round Time :
-                            <span id="average_round_time"></span>
-                        </div>
-
-                    </div>
-
-
-
-                    <div class="row" style="overflow-y: scroll; height:800px;">
-                        <div class="col s12">
-                            <table id="table_sequence" class="bordered highlight">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Sequence Number</th>
-                                        <th>Request(Msec)</th>
-                                        <th>Reply(Msec)</th>
-                                        <th>Round Time(Msec)</th>
-                                        <!-- <th>TTL Expire</th>
-                                        <th>Unreachable</th> -->
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- <div class="row">
-                        <div class="col s6">
-                            <div>Total Icmp Pairs From all Files: </div>
-                        </div>
-                    </div>
-
-
-                    <div class="row">
-                        <div class="col s12">
-                            <table id="table_sequence2" class="bordered highlight">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Sequence Number</th>
-                                        <th>Request</th>
-                                        <th>Reply</th>
-                                        <th>Unsupported Type</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div> -->
                 </div>
             </div>
         </div>
-    </div>
-    <!-- display icmp database and perform action -->
-    <!-- <div class="row" id="database_icmp">
-            <div class="col s6">
-                <div class="row">
-                    <div class="col s4">
-                        <button class="btn" id="btn_get_icmp_database_all" onclick="get_icmp_database_all()">Show Database Files</button>
-                    </div>
-                </div>
-
-                <table id="icmp_table_database_files" class="highlight">
-                    <thead>
-                        <tr>
-                            <th>Filename</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-
-        </div> -->
-    <!-- </div> -->
-
 </body>
 
 </html>

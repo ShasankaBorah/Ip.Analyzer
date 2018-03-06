@@ -250,23 +250,6 @@ void callback(const std::string& uri, const std::string& str)
 		*loading individual selected dataabase file 
 		* ends here
 		********************************************/
-
-        //else if (tokens.at(0).compare("start_analysis") == 0) /*for pcap analysis*/
-        //{
-        //    //filesToAnalyze.initialize();
-        //    filesToAnalyze.start_analysis();
-        //    std::string result = filesToAnalyze.printToJSON();
-        //    server_instance.send_data("/ws/command", result);
-        //}		
-        //else if (tokens.at(0).compare("start_icmp_analysis") == 0) /*for icmp analysis*/
-        //{
-        //    icmp_analyze.initialize();
-        //    icmp_analyze.start_analysis();
-			
-
-        //    std::string result =  icmp_analyze.printToJSON();
-        //    server_instance.send_data("/ws/command", result);
-        //}
 		else if(tokens.at(0).compare("start_tcp_analysis") == 0) /*for tcp analysis*/
 		{
 			tcp_analyze.initialize();
