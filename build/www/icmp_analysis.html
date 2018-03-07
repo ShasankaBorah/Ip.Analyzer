@@ -93,7 +93,7 @@
             } else if (obj.type == "icmp_database") {
                 console.log("Full icmp database files received.");
                 display_icmp_database(obj);
-                $('#btn_get_icmp_database_all').removeClass('disabled');
+                //$('#btn_get_icmp_database_all').removeClass('disabled');
             }
         }
 
@@ -132,7 +132,8 @@
             ws_command.send("start_icmp_analysis&" + excludePrivateIp);
         }
 
-        function display_analysis_data(obj) { //for icmp analysis
+        /**************************TO DISPLAY DATA AFTER ANALYSIS IS DONE OR DATABASE FILE IS LOADED**************************************************/
+        function display_analysis_data(obj) { 
 
             if (obj.streams == undefined) {
                 Materialize.toast('No public IP data available !!', 4000);
@@ -156,7 +157,9 @@
             initialise_stream_display();
         }
 
+        /**************************************************************************************************************************************************/
 
+        /******************************** DISPLAYS INFO ABOUT THE FL RL FOLDER PATH , TIME OF ANALYSIS AND FILES READ**************************************/
         function stream_data_file_result_body(obj) {
             $('#file_result tbody').empty();
 
@@ -206,7 +209,9 @@
                 $('#file_result tbody').append(dtr);
             }
         }
+        /************************************************************************************************************************************************/
 
+        /********************************IT CALLS DISPLAY STREAM DATA TO SHOW THE DATA IN THE TABLE, AND SETS START AND LIMIT VALUE****************************************************/
         function initialise_stream_display() {
             if (g_data == undefined) return;
 
@@ -223,7 +228,10 @@
             display_stream_data(start, limit);
             $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
         }
+        /*****************************************************************************************************************************************************************************/
 
+
+        /*********************************FUCNTION TO DISPLAY THE DATA IN THE TABLE***************************************************************************************************/
         function display_stream_data(start, limit) {
             table_result.empty();
 
@@ -315,10 +323,14 @@
                 }
             }
         }
+        /****************************************************************************************************************************************************************************/
 
-        function ipCompare_to_private(ip) //to compare src or dst string to check if its private or public
+        /*****************************************COMPARES THE SRC AND DST STRING TO CHECK IF ITS PRIVATE OR PUBLIC*****************************************************************
+        ******************************************************* TRUE == PRIVATE : FALSE == PUBLIC***********************************************************************************
+        ****************************************************************************************************************************************************************************/
+        function ipCompare_to_private(ip) 
         {
-            //true == private ; false == public
+           
             if (ten_subnet.test(ip)) {
                 return true;
             }
@@ -333,10 +345,12 @@
             }
             else
                 return false;
-
         }
+        /********************************************************************************************************************************************************************************/
 
-        function funct_to_load_two_way_pairs(start, limit) // function to display pairs only after #function called by load_two_way_icmp function
+
+        /*****************************************DISPLAYS PAIRS ONLY AFTER THIS FUCNTION IS CALLED BY THE LOAD_TWO_WAY_ICMP_PAIRS*****************************************************/
+        function funct_to_load_two_way_pairs(start, limit)
         {
             table_result.empty();
 
@@ -418,9 +432,10 @@
                 table_result.append(pair_str);
             }
         }
+        /***********************************************************************************************************************************************************************************/
 
 
-
+        /*******************************************CALLED WHEN THE BUTTON -> LOAD TWO WAY IS BEING CLICKED TO SHOW THE DATA WITH BOTH FL AND RL FILES PRESENT****************************/
         function load_two_way_icmp() { //to load two way data
             $('#btn_load_two_way_icmp').addClass('disabled');
             $('#btn_reset').removeClass('disabled');
@@ -431,8 +446,10 @@
             funct_to_load_two_way_pairs(start, limit);
             $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
         }
+        /*********************************************************************************************************************************************************************************/
 
 
+        /*************************************************************TO RESET THE TABLE *************************************************/
         function load_all_icmp_streams() { // to reset the table to original data
             $('#btn_load_two_way_icmp').removeClass('disabled');
             $('#btn_reset').addClass('disabled');
@@ -441,7 +458,10 @@
             initialise_stream_display();
             // $('#btn_reset').removeClass('disabled');
         }
+        /**********************************************************************************************************************************/
 
+
+        /***************************************************************TO LOAD NEXT PAGE**********************************************/
         function load_table_result_next() { //next button functionality
             $('#btn_reset').removeClass('disabled');
             if (two_way_only == true) {
@@ -468,7 +488,11 @@
                 $('#p_table_result_info').html((next + 1) + '-' + limit + '(' + max_size + ')');
             }
         }
+        /*****************************************************************************************************************************/
 
+
+
+        /*********************************TO LOAD PREVIOUS PAGE*******************************************************************/
         function load_table_result_prev() { //previous button functionality
             if (two_way_only == true) {
                 if ((limit % 100) == 0) {
@@ -523,8 +547,11 @@
                 $('#p_table_result_info').html((prev + 1) + '-' + limit + '(' + max_size + ')');
             }
         }
+        /**********************************************************************************************************************/
 
-        // to show the data after a row nhas been clicked
+
+
+        /********************************************* to show the data after a row has been clicked ********************************************/
         function display_seq_data(idx) {
             if (two_way_only == true) {
                 if (idx > 0 && idx <= g_data_pair_only.length) {
@@ -545,7 +572,6 @@
             let totalTransactions = 0;
             let defaultTypes = 0;  //includes ttl exceeded , host unreachable and any other values 
 
-            // to show total number of transaction
             if (stream.unsuported_or_default != undefined && stream.sequence_array != undefined) {
                 totalTransactions = stream.sequence_array.length;
                 defaultTypes = stream.unsuported_or_default.length;
@@ -577,9 +603,6 @@
             }
 
             /************************************************************************************************************************************/
-
-
-
         }
 
         function showBothSeqDataUnsupportData(seqData, unsupportData) {
@@ -596,7 +619,7 @@
                 if (seqData[i].request == true) {
                     countReq1++;
                 }
-                if (seqDataata[i].reply == true) {
+                if (seqData[i].reply == true) {
                     countRep1++;
                 }
 
@@ -690,36 +713,36 @@
 
             $('#table_sequence_2 tbody').empty();
             var str_ = "";
-            for (k = 0; k < defaultData.length; k++) {
-                var req = defaultData[k].request;
-                var rep = defaultData[k].reply;
+            for (k = 0; k < unsupportData.length; k++) {
+                var req = unsupportData[k].request;
+                var rep = unsupportData[k].reply;
                 if (req == true && rep == true) {
-                    let repTime = defaultData[k].repts;
-                    let reqTime = defaultData[k].reqts;
+                    let repTime = unsupportData[k].repts;
+                    let reqTime = unsupportData[k].reqts;
 
                     let diffInTime = moment.duration(repTime - reqTime);
 
                     str_ += '<tr class="green">';
                     str_ += '<td>' + (k + 1) + '</td>';
-                    str_ += '<td>' + defaultData[k].sequence_no + '</td>';
-                    str_ += '<td>' + defaultData[k].reqts + '</td>';
-                    str_ += '<td>' + defaultData[k].repts + '</td>';
+                    str_ += '<td>' + unsupportData[k].sequence_no + '</td>';
+                    str_ += '<td>' + unsupportData[k].reqts + '</td>';
+                    str_ += '<td>' + unsupportData[k].repts + '</td>';
                     str_ += '<td>' + (diffInTime.hours() > 0 ? diffInTime.hours() + ' hrs ' : '') + (diffInTime.minutes() > 0 ? diffInTime.minutes() + ' mins ' : '') + (diffInTime.seconds() > 0 ? diffInTime.seconds() + ' seconds ' : '') + (diffInTime.milliseconds() + ' msecs') + '</td>';
                 }
                 else {
                     str_ += '<tr>';
                     str_ += '<td>' + (k + 1) + '</td>';
-                    str_ += '<td>' + defaultData[k].sequence_no + '</td>';
+                    str_ += '<td>' + unsupportData[k].sequence_no + '</td>';
 
                     if (req == true) {
-                        str_ += '<td>' + defaultData[k].reqts + '</td>';
+                        str_ += '<td>' + unsupportData[k].reqts + '</td>';
                     }
                     else {
                         str_ += '<td>' + "NA" + '</td>';
                     }
 
                     if (rep == true) {
-                        str_ += '<td>' + defaultData[k].repts + '</td>';
+                        str_ += '<td>' + unsupportData[k].repts + '</td>';
                     }
                     else {
                         str_ += '<td>' + "NA" + '</td>';
@@ -730,15 +753,6 @@
                 str_ += '</tr>';
             }
             $('#table_sequence_2 tbody').append(str_);
-
-
-
-
-
-
-
-
-
         }
 
         function showUnsupportedData(defaultData) {
@@ -927,7 +941,10 @@
             $('#table_sequence tbody').append(str);
         }
 
-        function calculateMinMaxTime(sequenceArray) { //calculate min max , avg and return the values in an array
+
+        /*********************CALCULATE MIN , MAX, AVERAGE AND RETURN VALUES IN AN ARRAY******************************************/
+       
+        function calculateMinMaxTime(sequenceArray) { 
             let timeArray = [];
             let roundTime = [];
             let sequenceArrayLength = sequenceArray.length;
@@ -970,13 +987,7 @@
             return timeArray;
         }
 
-
-
-
-        function get_icmp_database_all() {
-            $('#btn_get_icmp_database_all').addClass('disabled');
-            ws_command.send("get_icmp_database_all");
-        }
+        /**************************************************************************************************************************************/
 
 
         function display_icmp_database(obj) //for displaying the database file in the select section
@@ -995,7 +1006,6 @@
 
         function load_selected_db() {
             $('#btn_load_selected_dbs').addClass('disabled');
-            //btn_load_selected_dbs
             let selected_db = $('#select_db_list :selected').val();
             ws_command.send("load_selected_icmp_db&" + selected_db.toString());
         }
@@ -1036,16 +1046,13 @@
         <br>
 
         <!-- div to show the tabs-->
-        <!--        <div id="div_icmp_analysis">icmp analysis</div>-->
         <div class="row" id="div_icmp_analysis">
             <div class="row">
                 <div class="col s12">
                     <div class="row">
                         <button class="btn col s1" id="btn_start_icmp_analysis" onclick="start_icmp_analysis()">ICMP Analysis</button>
-                        <!-- <button class="btn" id="btn_load_from_icmp_db" onclick="load_from_icmp_db()">Load from database</button> -->
                         <button class="btn col s1" id="btn_load_two_way_icmp" onclick="load_two_way_icmp()">Load Two Way</button>
                         <button class="btn col s1" id="btn_reset" onclick="load_all_icmp_streams()">Reset</button>
-                        <!-- <button onclick="get_icmp_database_all()" data-target="modal1" class="btn modal-trigger">Database</button> -->
 
                         <div class="input-field col s3">
                             <select id="select_db_list"></select>
@@ -1104,19 +1111,6 @@
                     </table>
                 </div>
             </div>
-
-            <!-- <div class="col s6">
-                <table id="pairs_result">
-                    <thead>
-                        <tr>
-                            <th>FL Frequencies</th>
-                            <th>RL Frequencies</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div> -->
-
 
             <!--data display table-->
             <div class="row">
@@ -1199,12 +1193,12 @@
 
                             <div class="row">
                                 <div class="col s6">
-                                    Request :
+                                    Request Count :
                                     <span id="_request"></span>
                                 </div>
 
                                 <div class="col s6">
-                                    Reply :
+                                    Reply Count :
                                     <span id="_reply"></span>
                                 </div>
 
