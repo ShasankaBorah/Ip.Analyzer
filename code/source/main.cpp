@@ -38,6 +38,7 @@ Dns_Analyzer dns_analyze;
 Protocol_analyzer protocol_analyze;
 Ip_Address_to_country_mapper ip_address_resolve;
 
+//ip_addr.get_country(ip);
 
 std::string selected_database;
 std::string get_database_data_all(std::string );/*function to load all database files in each analysis section*/

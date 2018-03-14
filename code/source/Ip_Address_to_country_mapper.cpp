@@ -144,6 +144,12 @@ jsonnlohmann Ip_Address_to_country_mapper::analyze(jsonnlohmann input_json)
 				std::cerr << e.what() << std::endl;
 			}
 		}
+
+		/*for (auto it = ip_to_country_map.begin(); it != ip_to_country_map.end(); ++it)
+		{
+			std::cout << it.key() << "\n" << std::endl;;
+		}*/
+
 	}
 
 
@@ -165,10 +171,6 @@ jsonnlohmann Ip_Address_to_country_mapper::analyze(jsonnlohmann input_json)
 			std::string ip_src = streams[i]["SrcIp"];
 			std::string ip_dst = streams[i]["DstIp"];
 
-			if (ip_src == "88.212.201.199" || ip_dst == "88.212.201.199")
-			{
-				cout << "hello" << std::endl;
-			}
 
 			if (stringComp(ip_src) == true)
 			{
@@ -224,7 +226,7 @@ jsonnlohmann Ip_Address_to_country_mapper::analyze(jsonnlohmann input_json)
 		}
 
 		// Get IP Address info from api
-		//uncomment if internet is connected
+		//to check is internet is connected or not
 		if (checkI)
 		{
 			if (!ip_address_set.empty())
@@ -250,9 +252,27 @@ jsonnlohmann Ip_Address_to_country_mapper::analyze(jsonnlohmann input_json)
 						j_json.clear();
 
 						get_country_info(inputBatch);
-						for (const auto &j : jsonnlohmann::iterator_wrapper(result_)) {
+
+						for (const auto &j : jsonnlohmann::iterator_wrapper(result_))
+						{			
 							ip_to_country_map[j.key()] = j.value();
 						}
+
+						/*jsonnlohmann ip = {};
+						for (auto it = ip_to_country_map.begin(); it != ip_to_country_map.end(); ++it)
+						{
+							
+							jsonnlohmann ipJson;
+							ipJson["Ip"] = it.key();
+							ipJson["data"] = it.value();
+							ip.push_back(ipJson);
+							
+						}*/
+					/*	std::ofstream o("pretty.json");
+						o <<  ip << std::endl;
+
+						std::string jsonString = ip_to_country_map.dump();*/
+
 						inputBatch.clear();
 						boost::this_thread::sleep(boost::posix_time::seconds(4));
 					}
@@ -332,6 +352,12 @@ void Ip_Address_to_country_mapper::make_request(http_client& client, method mtd,
 		{
 			wcout << previousTask.get().serialize() << endl;
 
+			std::wstring s = previousTask.get().serialize();
+			
+			/*std::string k(s.begin(), s.end());
+			
+			std::string test = jsonnlohmann::parse(k);*/
+
 			std::wstring wstr = previousTask.get().serialize();
 
 			std::string str(wstr.begin(), wstr.end());
@@ -375,3 +401,16 @@ std::string Ip_Address_to_country_mapper::stripUnicode(std::string  &s)
 
 	return s;
 }
+
+//json Ip_::get_country_info(std::string ip_addr_str)
+//{
+//	// first check in ip_to_country_map; /// json
+//
+//	// if found return info
+//
+//	// if not found query db
+//
+//	// if found in db add the info to map and return
+//
+//	// if not found in db then call api and add to both map and db and return info
+//}

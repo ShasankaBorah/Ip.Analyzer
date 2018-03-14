@@ -228,10 +228,10 @@ int Icmp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 					case 0:
 						found = true;
 						icmp_streams_vector.at(i).increment_icmp_src_dst();
-						if(ts == 0)
+						/*if(ts == 0)
 						{
 							std::cout << "hello" << std::endl;
-						}
+						}*/
 						icmp_streams_vector.at(i).update_icmp_pair_info(icmp_hdr->un.echo.sequence, icmp_hdr->type , ts);
 						if (is_fl)
 						{

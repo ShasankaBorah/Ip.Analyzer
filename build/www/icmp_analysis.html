@@ -25,6 +25,7 @@
         var g_data_pair_only = []; //array to filled with pairs data only
         var g_database_obj;
         var two_way_only = false;
+        var rr_pairs_flag = false;
         var two_way_table_data; // =fill the variable with the data
         var max_size;
         var start;
@@ -40,6 +41,7 @@
         var reserved_ip = /^100\.(6[4-9]|[7-9][0-9]|1([0-1][0-9]|2[0-7]))\.(0\.(0[ -9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))|([1-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5])))$/;
         var excludePrivateIp;
         var table_result;
+        var rr_pairs_data = [];
 
         $(document).ready(function () {
             initialise();
@@ -133,7 +135,7 @@
         }
 
         /**************************TO DISPLAY DATA AFTER ANALYSIS IS DONE OR DATABASE FILE IS LOADED**************************************************/
-        function display_analysis_data(obj) { 
+        function display_analysis_data(obj) {
 
             if (obj.streams == undefined) {
                 Materialize.toast('No public IP data available !!', 4000);
@@ -144,11 +146,33 @@
             two_way_table_data = obj.streams;
 
             var j = 0;
+            var c = 0;
             if (obj.streams != undefined) {
-                for (i = 0; i < two_way_table_data.length; i++) {
+                for (i = 0; i < two_way_table_data.length; i++) 
+                {
                     if ((two_way_table_data[i].folders_FL instanceof Array) && (two_way_table_data[i].folders_RL instanceof Array)) {
                         g_data_pair_only[j] = two_way_table_data[i];
                         j++;
+                    }
+
+                    if(two_way_table_data[i].sequence_array != undefined)
+                    {
+                        let rr_count = 0;
+                        for(let k = 0; k < two_way_table_data[i].sequence_array.length; k++)
+                        {
+                            if((two_way_table_data[i].sequence_array[k].request == true) && (two_way_table_data[i].sequence_array[k].reply == true))
+                            {
+                                rr_count++;
+                                if(rr_count > 0)
+                                {
+                                    rr_pairs_data[c] = two_way_table_data[i];
+                                    c++;
+                                    break;
+                                }
+                            }
+                            
+                        }
+                        
                     }
                 }
             }
@@ -328,9 +352,8 @@
         /*****************************************COMPARES THE SRC AND DST STRING TO CHECK IF ITS PRIVATE OR PUBLIC*****************************************************************
         ******************************************************* TRUE == PRIVATE : FALSE == PUBLIC***********************************************************************************
         ****************************************************************************************************************************************************************************/
-        function ipCompare_to_private(ip) 
-        {
-           
+        function ipCompare_to_private(ip) {
+
             if (ten_subnet.test(ip)) {
                 return true;
             }
@@ -349,9 +372,8 @@
         /********************************************************************************************************************************************************************************/
 
 
-        /*****************************************DISPLAYS PAIRS ONLY AFTER THIS FUCNTION IS CALLED BY THE LOAD_TWO_WAY_ICMP_PAIRS*****************************************************/
-        function funct_to_load_two_way_pairs(start, limit)
-        {
+        /*****************************************DISPLAYS PAIR ONLY AFTER THIS FUNCTION IS CALLED BY THE LOAD_TWO_WAY_ICMP_PAIRS*****************************************************/
+        function funct_to_load_two_way_pairs(start, limit) {
             table_result.empty();
 
 
@@ -438,6 +460,7 @@
         /*******************************************CALLED WHEN THE BUTTON -> LOAD TWO WAY IS BEING CLICKED TO SHOW THE DATA WITH BOTH FL AND RL FILES PRESENT****************************/
         function load_two_way_icmp() { //to load two way data
             $('#btn_load_two_way_icmp').addClass('disabled');
+            $('#btn_rr_pairs').removeClass('disabled');
             $('#btn_reset').removeClass('disabled');
             max_size = g_data_pair_only.length;
             start = 0;
@@ -452,9 +475,11 @@
         /*************************************************************TO RESET THE TABLE *************************************************/
         function load_all_icmp_streams() { // to reset the table to original data
             $('#btn_load_two_way_icmp').removeClass('disabled');
+            $('#btn_rr_pairs').removeClass('disabled');
             $('#btn_reset').addClass('disabled');
             limit = rows_per_page;
             two_way_only = false;
+            rr_pairs_flag = false;
             initialise_stream_display();
             // $('#btn_reset').removeClass('disabled');
         }
@@ -557,6 +582,10 @@
                 if (idx > 0 && idx <= g_data_pair_only.length) {
                     var stream = g_data_pair_only[idx - 1];
                 }
+            }
+            else if(rr_pairs_flag == true)
+            {
+                var stream = rr_pairs_data[idx - 1];
             } else {
                 if (idx > 0 && idx <= table_data.length) {
                     var stream = table_data[idx - 1];
@@ -568,6 +597,7 @@
             $('#p_seq_src').html(stream.SrcIp);
             $('#p_seq_dst').html(stream.DstIp);
 
+            
             /****************************************** To show transaction details************************************************************/
             let totalTransactions = 0;
             let defaultTypes = 0;  //includes ttl exceeded , host unreachable and any other values 
@@ -591,7 +621,8 @@
 
 
             /***********************************************************************************************************************************/
-            /* to show the total number of pairs with req and rep == true ,  total unreachable , total timexceeded . request count , reply count*/
+            /* to show the total number of pairs with req and rep == true ,  total unreachable , total timexceeded . request count , reply count
+            *************************************************************************************************************************************/
             if (stream.sequence_array != undefined && stream.unsuported_or_default == undefined) {
                 showSequenceData(stream.sequence_array);
             }
@@ -636,19 +667,19 @@
 
 
             for (let i = 0; i < unsupportData.length; i++) {
-                let req = unsupportData[i].request;
-                let rep = unsupportData[i].reply;
+                // let req = unsupportData[i].request;
+                // let rep = unsupportData[i].reply;
 
-                if (unsupportData[i].request == true) {
-                    countReq1++;
-                }
-                if (unsupportData[i].reply == true) {
-                    countRep1++;
-                }
+                // if (unsupportData[i].request == true) {
+                //     countReq1++;
+                // }
+                // if (unsupportData[i].reply == true) {
+                //     countRep1++;
+                // }
 
-                if (req == true && rep == true) {
-                    count++;
-                }
+                // if (req == true && rep == true) {
+                //     count++;
+                // }
                 if (unsupportData[i].dstUnreachable != false) {
                     unreachableCount++;
                 }
@@ -676,13 +707,19 @@
                     let repTime = seqData[k].repts;
                     let reqTime = seqData[k].reqts;
 
+                    let replyTime = moment(repTime);
+                    let rt  = replyTime.format("M/D/YYYY H:mm:ss:SSS");
+                   
+                    let requestTime = moment(reqTime);
+                    let st = requestTime.format("M/D/YYYY H:mm:ss:SSS");
+
                     let diffInTime = moment.duration(repTime - reqTime);
 
                     str += '<tr class="green">';
                     str += '<td>' + (k + 1) + '</td>';
                     str += '<td>' + seqData[k].sequence_no + '</td>';
-                    str += '<td>' + seqData[k].reqts + '</td>';
-                    str += '<td>' + seqData[k].repts + '</td>';
+                    str += '<td>' + st + '</td>';
+                    str += '<td>' + rt + '</td>';
                     str += '<td>' + (diffInTime.hours() > 0 ? diffInTime.hours() + ' hrs ' : '') + (diffInTime.minutes() > 0 ? diffInTime.minutes() + ' mins ' : '') + (diffInTime.seconds() > 0 ? diffInTime.seconds() + ' seconds ' : '') + (diffInTime.milliseconds() + ' msecs') + '</td>';
                 }
                 else {
@@ -691,14 +728,18 @@
                     str += '<td>' + seqData[k].sequence_no + '</td>';
 
                     if (req == true) {
-                        str += '<td>' + seqData[k].reqts + '</td>';
+                        let req_time = moment(seqData[k].reqts);
+                        let r = req_time.format("M/D/YYYY H:mm:ss:SSS");
+                        str += '<td>' + r + '</td>';
                     }
                     else {
                         str += '<td>' + "NA" + '</td>';
                     }
 
                     if (rep == true) {
-                        str += '<td>' + seqData[k].repts + '</td>';
+                        let rep_time = moment(seqData[k].repts);
+                        let s = rep_time.format("M/D/YYYY H:mm:ss:SSS");
+                        str += '<td>' + s + '</td>';
                     }
                     else {
                         str += '<td>' + "NA" + '</td>';
@@ -714,42 +755,29 @@
             $('#table_sequence_2 tbody').empty();
             var str_ = "";
             for (k = 0; k < unsupportData.length; k++) {
-                var req = unsupportData[k].request;
-                var rep = unsupportData[k].reply;
-                if (req == true && rep == true) {
-                    let repTime = unsupportData[k].repts;
-                    let reqTime = unsupportData[k].reqts;
 
-                    let diffInTime = moment.duration(repTime - reqTime);
+                str_ += '<tr>';
+                str_ += '<td>' + (k + 1) + '</td>';
+                str_ += '<td>' + unsupportData[k].sequence_no + '</td>';
 
-                    str_ += '<tr class="green">';
-                    str_ += '<td>' + (k + 1) + '</td>';
-                    str_ += '<td>' + unsupportData[k].sequence_no + '</td>';
-                    str_ += '<td>' + unsupportData[k].reqts + '</td>';
-                    str_ += '<td>' + unsupportData[k].repts + '</td>';
-                    str_ += '<td>' + (diffInTime.hours() > 0 ? diffInTime.hours() + ' hrs ' : '') + (diffInTime.minutes() > 0 ? diffInTime.minutes() + ' mins ' : '') + (diffInTime.seconds() > 0 ? diffInTime.seconds() + ' seconds ' : '') + (diffInTime.milliseconds() + ' msecs') + '</td>';
+                if (unsupportData[k].ttlExceeded == true) {
+                    let ttl = moment(unsupportData[k].ttlexcesstime);
+                    let ttl_converted = ttl.format("M/D/YYYY H:mm:ss:SSS");
+                    str_ += '<td>' + ttl_converted + '</td>';
                 }
                 else {
-                    str_ += '<tr>';
-                    str_ += '<td>' + (k + 1) + '</td>';
-                    str_ += '<td>' + unsupportData[k].sequence_no + '</td>';
-
-                    if (req == true) {
-                        str_ += '<td>' + unsupportData[k].reqts + '</td>';
-                    }
-                    else {
-                        str_ += '<td>' + "NA" + '</td>';
-                    }
-
-                    if (rep == true) {
-                        str_ += '<td>' + unsupportData[k].repts + '</td>';
-                    }
-                    else {
-                        str_ += '<td>' + "NA" + '</td>';
-                    }
-
                     str_ += '<td>' + "NA" + '</td>';
                 }
+
+                if (unsupportData[k].dstUnreachable == true) {
+                    let unrc = moment(unsupportData[k].unreachabletime);
+                    let unrc_converted = unrc.format("M/D/YYYY H:mm:ss:SSS");
+                    str_ += '<td>' + unrc_converted + '</td>';
+                }
+                else {
+                    str_ += '<td>' + "NA" + '</td>';
+                }
+
                 str_ += '</tr>';
             }
             $('#table_sequence_2 tbody').append(str_);
@@ -763,19 +791,7 @@
             let countRep1 = 0; //reply count for request to reply
 
             for (let i = 0; i < defaultData.length; i++) {
-                let req = defaultData[i].request;
-                let rep = defaultData[i].reply;
 
-                if (defaultData[i].request == true) {
-                    countReq1++;
-                }
-                if (defaultData[i].reply == true) {
-                    countRep1++;
-                }
-
-                if (req == true && rep == true) {
-                    count++;
-                }
                 if (defaultData[i].dstUnreachable != false) {
                     unreachableCount++;
                 }
@@ -800,42 +816,28 @@
             $('#table_sequence_2 tbody').empty();
             var str = "";
             for (k = 0; k < defaultData.length; k++) {
-                var req = defaultData[k].request;
-                var rep = defaultData[k].reply;
-                if (req == true && rep == true) {
-                    let repTime = defaultData[k].repts;
-                    let reqTime = defaultData[k].reqts;
+                str += '<tr>';
+                str += '<td>' + (k + 1) + '</td>';
+                str += '<td>' + defaultData[k].sequence_no + '</td>';
 
-                    let diffInTime = moment.duration(repTime - reqTime);
-
-                    str += '<tr class="green">';
-                    str += '<td>' + (k + 1) + '</td>';
-                    str += '<td>' + defaultData[k].sequence_no + '</td>';
-                    str += '<td>' + defaultData[k].reqts + '</td>';
-                    str += '<td>' + defaultData[k].repts + '</td>';
-                    str += '<td>' + (diffInTime.hours() > 0 ? diffInTime.hours() + ' hrs ' : '') + (diffInTime.minutes() > 0 ? diffInTime.minutes() + ' mins ' : '') + (diffInTime.seconds() > 0 ? diffInTime.seconds() + ' seconds ' : '') + (diffInTime.milliseconds() + ' msecs') + '</td>';
+                if (defaultData[k].ttlExceeded == true) {
+                    let ttl = moment(defaultData[k].ttlexcesstime);
+                    let ttl_converted = ttl.format("M/D/YYYY H:mm:ss:SSS");
+                    str += '<td>' + ttl_converted + '</td>';
                 }
                 else {
-                    str += '<tr>';
-                    str += '<td>' + (k + 1) + '</td>';
-                    str += '<td>' + defaultData[k].sequence_no + '</td>';
-
-                    if (req == true) {
-                        str += '<td>' + defaultData[k].reqts + '</td>';
-                    }
-                    else {
-                        str += '<td>' + "NA" + '</td>';
-                    }
-
-                    if (rep == true) {
-                        str += '<td>' + defaultData[k].repts + '</td>';
-                    }
-                    else {
-                        str += '<td>' + "NA" + '</td>';
-                    }
-
                     str += '<td>' + "NA" + '</td>';
                 }
+
+                if (defaultData[k].dstUnreachable == true) {
+                    let unrc = moment(defaultData[k].unreachabletime);
+                    let unrc_converted = unrc.format("M/D/YYYY H:mm:ss:SSS");
+                    str += '<td>' + unrc_converted + '</td>';
+                }
+                else {
+                    str += '<td>' + "NA" + '</td>';
+                }
+
                 str += '</tr>';
             }
             $('#table_sequence_2 tbody').append(str);
@@ -906,13 +908,20 @@
                     let repTime = sequence_data[k].repts;
                     let reqTime = sequence_data[k].reqts;
 
+                    /*EPOCH TIME since January 1st 1970 */
+                    let replyTime = moment(repTime);
+                    let rt  = replyTime.format("M/D/YYYY H:mm:ss:SSS");
+                   
+                    let requestTime = moment(reqTime);
+                    let st = requestTime.format("M/D/YYYY H:mm:ss:SSS");
+
                     let diffInTime = moment.duration(repTime - reqTime);
 
                     str += '<tr class="green">';
                     str += '<td>' + (k + 1) + '</td>';
                     str += '<td>' + sequence_data[k].sequence_no + '</td>';
-                    str += '<td>' + sequence_data[k].reqts + '</td>';
-                    str += '<td>' + sequence_data[k].repts + '</td>';
+                    str += '<td>' + st + '</td>';
+                    str += '<td>' + rt + '</td>';
                     str += '<td>' + (diffInTime.hours() > 0 ? diffInTime.hours() + ' hrs ' : '') + (diffInTime.minutes() > 0 ? diffInTime.minutes() + ' mins ' : '') + (diffInTime.seconds() > 0 ? diffInTime.seconds() + ' seconds ' : '') + (diffInTime.milliseconds() + ' msecs') + '</td>';
                 }
                 else {
@@ -921,14 +930,18 @@
                     str += '<td>' + sequence_data[k].sequence_no + '</td>';
 
                     if (req == true) {
-                        str += '<td>' + sequence_data[k].reqts + '</td>';
+                        let req_time = moment(sequence_data[k].reqts);
+                        let r = req_time.format("M/D/YYYY H:mm:ss:SSS");
+                        str += '<td>' + r + '</td>';
                     }
                     else {
                         str += '<td>' + "NA" + '</td>';
                     }
 
                     if (rep == true) {
-                        str += '<td>' + sequence_data[k].repts + '</td>';
+                        let rep_time = moment(sequence_data[k].repts);
+                        let s = rep_time.format("M/D/YYYY H:mm:ss:SSS");
+                        str += '<td>' + s + '</td>';
                     }
                     else {
                         str += '<td>' + "NA" + '</td>';
@@ -943,8 +956,8 @@
 
 
         /*********************CALCULATE MIN , MAX, AVERAGE AND RETURN VALUES IN AN ARRAY******************************************/
-       
-        function calculateMinMaxTime(sequenceArray) { 
+
+        function calculateMinMaxTime(sequenceArray) {
             let timeArray = [];
             let roundTime = [];
             let sequenceArrayLength = sequenceArray.length;
@@ -1035,6 +1048,115 @@
         }
 
 
+        /*****************************************this function is invoked when button LOAD RR PAIRS is being pressed***********************************************/
+        function rr_pairs(start,limit)
+        {
+
+            table_result.empty();
+
+            if (rr_pairs_data == undefined || !(rr_pairs_data    instanceof Array)) return;
+
+            for (i = start; i < limit; ++i) {
+                var stream = rr_pairs_data[i];
+                var str = '<tr>';
+                str += '<td>' + (i + 1) + '</td>';
+                str += '<td>' + stream.SrcIp + '</td>';
+
+                if (ipCompare_to_private(stream.SrcIp)) {
+                    str += '<td>' + "privateIP" + '</td>';
+                }
+                else if (stream.src_info == "NA") {
+                    str += '<td>' + "NA" + '</td>';
+                }
+                else {
+                    str += '<td>' + stream.src_info.countryName + '</td>';
+                }
+
+                str += '<td>' + stream.DstIp + '</td>';
+
+                if (ipCompare_to_private(stream.DstIp)) {
+                    str += '<td>' + "privateIP" + '</td>';
+                }
+                else if (stream.dst_info == "NA") {
+                    str += '<td>' + "NA" + '</td>';
+                }
+                else {
+                    str += '<td>' + stream.dst_info.countryName + '</td>';
+                }
+
+                str += '<td>' + stream.src_dst + '</td>';
+                str += '<td>' + stream.dst_src + '</td>';
+                str += '<td>';
+                if (stream.folders_FL instanceof Array) {
+                    for (j = 0; j < stream.folders_FL.length; ++j) {
+                        str += stream.folders_FL[j] + "<br>";
+                    }
+                }
+                str += '</td>';
+                str += '<td>';
+                if (stream.folders_RL instanceof Array) {
+                    for (j = 0; j < stream.folders_RL.length; ++j) {
+                        str += stream.folders_RL[j] + "<br>";
+                    }
+                }
+                str += '</td>';
+
+                if (stream.sequence_array != undefined) {
+                    str += '<td>';
+                    let count = 0;
+                    for (let k = 0; k < stream.sequence_array.length; ++k) {
+                        totalCount = stream.sequence_array.length;
+                        if (stream.sequence_array[k].request == true && stream.sequence_array[k].reply == true) {
+                            count += 1;
+                        }
+
+                    }
+                    str += count + '</td>';
+
+                    let roundTimeArray = [];
+
+                    let minMax = calculateMinMaxTime(stream.sequence_array);
+
+                    str += '<td>';
+                    str += minMax[0];
+                    str += '</td>';
+
+                    str += '<td>';
+                    str += minMax[1];
+                    str += '</td>';
+
+                    str += '<td>';
+                    str += minMax[2]
+                    str += '</td>';
+
+                    str += '</tr>';
+                    table_result.append(str);
+                }
+                else {
+                    str += '<td>' + 'NA' + '</td>';
+                    str += '<td>' + 'NA' + '</td>';
+                    str += '<td>' + 'NA' + '</td>';
+                    str += '<td>' + 'NA' + '</td>';
+                    str += '</tr>';
+                    table_result.append(str);
+                }
+            }
+        }
+
+
+        /**********************************************************************************************************************************************************/
+
+        function load_all_rr_pairs()
+        {
+            $('#btn_rr_pairs').addClass('disabled');
+            $('#btn_reset').removeClass('disabled');
+            max_size = rr_pairs_data.length;
+            start = 0;
+            limit = Math.min(rr_pairs_data.length, limit);
+           rr_pairs_flag = true;
+           rr_pairs(start, limit);
+            $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
+        }
     </script>
 </head>
 
@@ -1053,7 +1175,7 @@
                         <button class="btn col s1" id="btn_start_icmp_analysis" onclick="start_icmp_analysis()">ICMP Analysis</button>
                         <button class="btn col s1" id="btn_load_two_way_icmp" onclick="load_two_way_icmp()">Load Two Way</button>
                         <button class="btn col s1" id="btn_reset" onclick="load_all_icmp_streams()">Reset</button>
-
+                        <button class="btn col s1" id="btn_rr_pairs" onclick="load_all_rr_pairs()">Load RR Pairs</button>
                         <div class="input-field col s3">
                             <select id="select_db_list"></select>
                             <label>Available Databases</label>
@@ -1226,10 +1348,10 @@
 
                         <ul id="tabs-swipe-demo" class="tabs">
                             <li class="tab col s3">
-                                <a class="active" href="#test-swipe-1">Supported Type</a>
+                                <a class="active" href="#test-swipe-1">Request Reply(Ping)</a>
                             </li>
                             <li class="tab col s3">
-                                <a href="#test-swipe-2">Unsupported Type</a>
+                                <a href="#test-swipe-2">Other Type</a>
                             </li>
                         </ul>
 
@@ -1242,8 +1364,8 @@
                                             <tr>
                                                 <th>#</th>
                                                 <th>Sequence Number</th>
-                                                <th>Request(Msec)</th>
-                                                <th>Reply(Msec)</th>
+                                                <th>Request Timestamp</th>
+                                                <th>Reply Timestamp</th>
                                                 <th>Round Time(Msec)</th>
                                             </tr>
                                         </thead>
@@ -1262,10 +1384,8 @@
                                             <tr>
                                                 <th>#</th>
                                                 <th>Sequence Number</th>
-                                                <th>Request(Msec)</th>
-                                                <th>Reply(Msec)</th>
-                                                <th>Round Time(Msec)</th>
-
+                                                <th>TTL Exceed</th>
+                                                <th>Host Unreachable</th>
                                             </tr>
                                         </thead>
                                         <tbody></tbody>

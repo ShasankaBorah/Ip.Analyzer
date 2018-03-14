@@ -40,6 +40,8 @@ public:
 
 	
 	std::string						stripUnicode(std::string  &s);
+
+	//json get_country_info(std::string ip_addr_str);
 	
 
 };
