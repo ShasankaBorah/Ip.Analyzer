@@ -23,6 +23,16 @@
   <script src="js/d3.min.js"></script>
   <script src="js/topojson.min.js"></script>
   <script src="js/datamaps.world.js"></script>
+  <link type='text/css' rel='stylesheet' href='libs/tablesorter/css/theme.default.min.css' />
+  <!-- <link type='text/css' rel='stylesheet' href='libs/tablesorter/theme.materialize.min.css'/> -->
+  <script type="text/javascript" src="libs/tablesorter/js/jquery.tablesorter.min.js"></script>
+  <script type="text/javascript" src="libs/tablesorter/js/jquery.tablesorter.widgets.min.js"></script>
+
+  <!-- pager plugin -->
+  <link rel="stylesheet" href="libs/tablesorter/css/jquery.tablesorter.pager.min.css">
+  <script src="libs/tablesorter/js/jquery.tablesorter.pager.min.js"></script>
+
+
 
   <script type="text/javascript">
     // Declare global variables here
@@ -86,11 +96,17 @@
         $('#nav_index').addClass('red lighten-2');
       });
 
-      
-     
+
+
 
       $('select').material_select();
 
+      /*****************This part is to sort the table which needs to be updated after each next page click**************************************/
+      $('#table_result').tablesorter({
+        initWidgets: true,
+        widgets: ['zebra', 'columns', 'filter']
+      });
+      /******************************************************************************************************************************************/
 
     }
 
@@ -104,8 +120,7 @@
 
       //       });
 
-      if(  $('#exclude_private_ip').get(0).checked)
-      {
+      if ($('#exclude_private_ip').get(0).checked) {
         excludePrivateIp = true;
       }
       $('#btn_start_analysis').addClass('disabled');
@@ -450,7 +465,14 @@
         str += '</tr>';
         table_result.append(str);
       }
+
+      /**********************************updating the table***************************/
+      $('#table_result').tablesorter().trigger('update');
+      /*******************************************************************************/
     }
+
+
+   
 
     function stream_data_country_count(obj) {
       var mySet_country = new Set();
@@ -668,7 +690,7 @@
       max_size = table_data.length;
       display_stream_data(start, limit);
       $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
-     
+
     }
 
     function display_pcap_database(obj) //for displaying data after loading the json from database
@@ -739,10 +761,10 @@
             </h6>
             <div class="col s2">
               <form>
-                  <p>
-                    <input class="with-gap" name="ex_Private_ip" checked="checked" type="checkbox" id="exclude_private_ip"/>
-                    <label for="exclude_private_ip">Exclude Private Ip</label>
-                  </p>
+                <p>
+                  <input class="with-gap" name="ex_Private_ip" checked="checked" type="checkbox" id="exclude_private_ip" />
+                  <label for="exclude_private_ip">Exclude Private Ip</label>
+                </p>
               </form>
             </div>
 
@@ -834,7 +856,8 @@
           <p id="p_table_result_info"></p>
         </div>
         <div style="overflow-y: scroll; height:800px;">
-          <table id="table_result" class="bordered highlight">
+          <table id="table_result" class="tablesorter-default">
+            <!-- bordered hightlight-->
             <!--displays contents of IP-->
             <thead>
               <tr>
