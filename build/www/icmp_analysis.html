@@ -91,11 +91,20 @@
                 $('#nav_icmp').addClass('red lighten-2');
             });
 
+            /******************************************pager options*********************************/
+            var pagerOptions = {container: $("#pager"),
+            page: 0,
+            size: 50,
+            savePages : false,
+        };
+            /*******************************************************************************************/
+
+            /**********************************this is the table sorter and pager code******************************************/
             $("#table_result_icmp").tablesorter({
                 initWidgets: true,
                 widgets: ['zebra', 'columns', 'filter']
-            }).tablesorterPager({ container: $("#pager") });
-
+            }).tablesorterPager(pagerOptions);
+            /*******************************************************************************************************************/
         }
 
 
@@ -1293,20 +1302,20 @@
 
             <!--data display table-->
             <div class="row pager" id="pager">
-               
-                <button class="btn prev" id="btn_table_result_prev">Prev</button>
-                <button class="btn next" id="btn_table_result_next">Next</button>
+
+                <button class="btn-small waves-effect waves-light prev" id="btn_table_result_prev">Prev</button>
+                <button class="btn-small waves-effect waves-light next" id="btn_table_result_next">Next</button>
                 <p id="p_table_result_info"></p>
-                <div class="input-field col s3">
-                <select class="pagesize">
+                <!-- <div class="input-field col s3">
+                    <select class="pagesize">
                         <option value="" disabled selected>Choose your option</option>
                         <option value="1">Option 1</option>
                         <option value="2">Option 2</option>
                         <option value="3">Option 3</option>
-                      </select>
-                      <label>Materialize Select</label>
-                      </div>
-              
+                    </select>
+                    <label>Materialize Select</label>
+                </div> -->
+
             </div>
 
 
