@@ -17,6 +17,14 @@
     <link type="text/css " rel="stylesheet" href="libs/animate.css">
     <script type="text/javascript" src="libs/moment.js"></script>
     <script type="text/javascript" src="js/data-formatter.js"></script>
+    <link type='text/css' rel='stylesheet' href='libs/tablesorter/css/theme.default.min.css' />
+    <!-- <link type='text/css' rel='stylesheet' href='libs/tablesorter/theme.materialize.min.css'/> -->
+    <script type="text/javascript" src="libs/tablesorter/js/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="libs/tablesorter/js/jquery.tablesorter.widgets.min.js"></script>
+
+    <!-- pager plugin -->
+    <link rel="stylesheet" href="libs/tablesorter/css/jquery.tablesorter.pager.min.css">
+    <script src="libs/tablesorter/js/jquery.tablesorter.pager.min.js"></script>
 
     <script type="text/javascript">
         var ws_command;
@@ -75,6 +83,22 @@
             $('#top_nav').load("top_nav.html", function () {
                 $('#nav_tcp').addClass('red lighten-2');
             });
+
+
+            var pagerOptions = {
+                container: $("#pager"),
+                page: 0,
+                size: 50,
+                savePages: false,
+            };
+            /*******************************************************************************************/
+
+            /**********************************this is the table sorter and pager code******************************************/
+            $("#table_result_tcp").tablesorter({
+                initWidgets: true,
+                widgets: ['zebra', 'columns', 'filter']
+            }).tablesorterPager(pagerOptions);
+
 
         }
 
@@ -155,10 +179,7 @@
             start = 0;
 
             limit = Math.min(table_data.length, limit);
-
             // display_req_rep_pairs_only();
-
-
             display_stream_data(start, limit);
             $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
         }
@@ -180,6 +201,7 @@
                 str += '</tr>';
                 table_result.append(str);
             }
+            $('#table_result_tcp').tablesorter().trigger('update');
         }
 
         function stream_data_file_result_body(obj) { //function to show number of files read , fl files , rl files, fl file path , rl file path
@@ -209,7 +231,7 @@
                         dtr += obj.data_info[0].fl_files[j] + '<br>';
                     }
                     dtr += '</td>'
-                }else{
+                } else {
                     dtr += '<td>'
                     dtr += 'No_Files'
                     dtr += '</td>'
@@ -300,26 +322,26 @@
 
 
         //code to search IP address from the table
-        function searchSrcFunction() {
-            // Declare variables 
-            var input, filter, table, tr, td, i;
-            input = document.getElementById("mySrcInput");
-            filter = input.value.toUpperCase();
-            table = document.getElementById("table_result_tcp");
-            tr = table.getElementsByTagName("tr");
+        // function searchSrcFunction() {
+        //     // Declare variables 
+        //     var input, filter, table, tr, td, i;
+        //     input = document.getElementById("mySrcInput");
+        //     filter = input.value.toUpperCase();
+        //     table = document.getElementById("table_result_tcp");
+        //     tr = table.getElementsByTagName("tr");
 
-            // Loop through all table rows, and hide those who don't match the search query
-            for (i = 0; i < tr.length; i++) {
-                td = tr[i].getElementsByTagName("td")[1];
-                if (td) {
-                    if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
-                        tr[i].style.display = "";
-                    } else {
-                        tr[i].style.display = "none";
-                    }
-                }
-            }
-        }
+        //     // Loop through all table rows, and hide those who don't match the search query
+        //     for (i = 0; i < tr.length; i++) {
+        //         td = tr[i].getElementsByTagName("td")[1];
+        //         if (td) {
+        //             if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+        //                 tr[i].style.display = "";
+        //             } else {
+        //                 tr[i].style.display = "none";
+        //             }
+        //         }
+        //     }
+        // }
 
 
         function load_table_result_next() {
@@ -437,22 +459,17 @@
 <body>
 
     <div id="top_nav"></div>
-    <!--DIV 1-->
+
     <div class="row">
-        <!--DIV 2-->
-
         <br>
         <br>
-
         <!-- div to show tcp analysis tabs-->
         <div class="row" id="div_tcp_analysis">
-            <!--DIV 4-->
+
             <div class="row">
-                <!--DIV 5-->
                 <div class="col s12">
-                    <!--DIV 6-->
                     <div class="row">
-                        <!--DIV 7-->
+
                         <button class="btn col s1" id="btn_start_tcp_analysis" onclick="start_tcp_analysis()">TCP Analysis</button>
                         <button class="btn col s1" id="btn_load_two_way_tcp" onclick="load_two_way_tcp()">Load Two Way</button>
                         <button class="btn col s1" onclick="load_all_tcp_streams()">Reset</button>
@@ -462,13 +479,11 @@
                         </div>
                         <button class="btn col s1" id="btn_load_selected_dbs" onclick="load_selected_db()">Load Selected File</button>
                     </div>
-                    <!--DIV 7 ends-->
                 </div>
             </div>
-            <!--DIV 6 ends-->
+
 
             <div class="row">
-                <!--DIV 8-->
                 <P id="p_current_file"></P>
                 <p id="p_progress"></p>
             </div>
@@ -476,7 +491,7 @@
             <div>
                 <p id="total_time_elapsed"></p>
             </div>
-            <!--DIV 8 ends-->
+
 
             <div class="row">
                 <h6>Number of Files Read :
@@ -502,33 +517,20 @@
                     </table>
                 </div>
             </div>
-            <!--
-                 data display table -->
+            
+            <!-- data display table -->
             <div class="row">
-                <!-- DIV 9-->
                 <button class="btn" id="btn_table_result_prev" onclick="load_table_result_prev()">Prev</button>
                 <button class="btn" id="btn_table_result_next" onclick="load_table_result_next()">Next</button>
                 <p id="p_table_result_info"></p>
             </div>
-            <!-- DIV 9 ends-->
+
 
 
 
             <div class="row">
-
-                <!-- DIV 12-->
                 <div class="col s5">
-                    <!-- DIV 13-->
-
-                    <div class="row">
-                        <!-- DIV 10-->
-                        <div class="col s7">
-                            <!-- DIV 11-->
-                            <input type="text" id="mySrcInput" onkeyup="searchSrcFunction()" placeholder="Search Source for IP..">
-                        </div>
-                    </div>
-                    <!-- DIV 10 ends-->
-                    <table id="table_result_tcp" class="bordered highlight">
+                    <table id="table_result_tcp" class="tablesorter-default">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -536,50 +538,33 @@
                                 <th>Destination IP</th>
                                 <th>FL File</th>
                                 <th>RL File</th>
-                                <!--
-                                    <th>Source To Dest.</th>
-                                    <th>Dest. To Source</th>
-                                    <th>FL Frequencies</th>
-                                    <th>RL Frequencies</th>-->
-
                             </tr>
                         </thead>
                         <tbody></tbody>
                     </table>
                 </div>
-                <!-- DIV 13 ends-->
+
                 <div id="result"> </div>
-                <!-- DIV 14-->
                 <div class="col s6">
-                    <!-- DIV 15-->
                     <div class="row">
-                        <!-- DIV 16-->
                         <div class="col s6">
-                            <!-- DIV 17-->
                             <div>Source IP Address:
                                 <span id="p_seq_src" />
                             </div>
-                            <!-- DIV 18-->
                         </div>
-                        <!-- DIV 17 ends-->
+
                         <div class="col s6">
-                            <!-- DIV 19-->
                             <div>Destination IP Address:
                                 <span id="p_seq_dst" />
                             </div>
-                            <!-- DIV 20-->
                         </div>
-                        <!-- DIV 19 ends-->
                     </div>
-                    <!-- DIV 16 ends-->
+
                     <div class="row">
-                        <!-- DIV 20-->
                         <div class="col s12">
-                            <!-- DIV 21-->
                             <table id="table_sequence" class="bordered highlight">
                                 <thead>
                                     <tr>
-                                        <!-- <th>#</th> -->
                                         <th>Src Port</th>
                                         <th>Dst Port</th>
                                         <th>Total Se.</th>
@@ -591,22 +576,11 @@
                                 <tbody></tbody>
                             </table>
                         </div>
-                        <!-- DIV 21 ends-->
                     </div>
-                    <!-- DIV 20 ends-->
-
                 </div>
-                <!-- DIV 15 ends-->
             </div>
-            <!-- DIV 12 ends-->
         </div>
-        <!--DIV 5 ends-->
     </div>
-    <!--DIV 4 ends-->
-
-
-    <!--DIV 2 ends-->
-
 </body>
 
 </html>

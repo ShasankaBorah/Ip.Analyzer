@@ -16,9 +16,13 @@
 #include <set>
 #include <Configuration.h>
 #include <algorithm>
-#include <fstream>
+#include <fstream>	
 #include <iosfwd>
 #include <string>
+#include <direct.h>
+#include <boost/asio/write.hpp>
+
+#define DIRNAME "C:\\Users\\shasa\\Documents\\GitHub\\Ip.Analyzer\\build\\" 
 
 
 using namespace std;
@@ -99,12 +103,12 @@ int32_t Tcp_Analyzer::start_analysis()
 			process(FilesVector.at(i), true);
 		}
 		FilesVector.clear();
-		
+
 	}
-	
+
 
 	/* Analyse RL Path*/
-	if(!config.get_rl_path().empty())
+	if (!config.get_rl_path().empty())
 	{
 		for (directory_iterator itr(config.get_rl_path()); itr != directory_iterator(); ++itr) /* top folder*/
 		{
@@ -131,7 +135,7 @@ int32_t Tcp_Analyzer::start_analysis()
 
 		FilesVector.clear();
 	}
-	
+
 
 	store_database();
 
@@ -149,6 +153,9 @@ int Tcp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 	struct in_addr					tcp_Saddr;
 	struct in_addr					tcp_Daddr;
 	jsonnlohmann					j_json_progress;
+	struct pcap_pkthdr* header;
+
+	const u_char* data;
 
 	std::string						folder = item.first;
 	std::string						filename = item.second;
@@ -180,6 +187,8 @@ int Tcp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 	while (true) /*while loop*/
 	{
 		int returnValue_for_tcp = pcap_next_ex(tcpDescriptor, &header, &data);
+
+
 
 		if (1 != returnValue_for_tcp)
 		{
@@ -214,7 +223,11 @@ int Tcp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 			ip_hdr = (ip_header*)(data + 14);
 			if (6 == ip_hdr->ip_protocol) /*if tcp*/
 			{
+				/*auto c = ip_hdr->ip_header_len;
+				auto k = ip_hdr->ip_total_length;*/
+
 				tcp_hdr = (tcp_header*)(data + 14 + (ip_hdr->ip_header_len * 4));
+				//auto z = tcp_hdr->data_offset;
 				memcpy((u_char*)&tcp_Saddr.s_addr, (u_char*)&ip_hdr->ip_srcaddr, 4);
 				string src(inet_ntoa(tcp_Saddr));
 
@@ -223,8 +236,13 @@ int Tcp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 
 				uint32_t s_port = ntohs(tcp_hdr->th_sport); /*source port number*/
 				uint32_t d_port = ntohs(tcp_hdr->th_dport); /*destination port number*/
+
+
 				uint64_t se_no = ntohl(tcp_hdr->s_number); /* sequence number of the packet*/
 				uint64_t ack_no = ntohl(tcp_hdr->ack_number); /*acknowledgement number of the packet*/
+
+				createOutputDir(src, dst, s_port, d_port, data, header); /*creates output directory and then call writeToBin to write the data to the bin file*/
+				
 
 				std::string src_port_str = std::to_string(s_port); /*converting source port and dst port to string to cancatenate*/
 				std::string dst_port_str = std::to_string(d_port);
@@ -235,8 +253,8 @@ int Tcp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 				 *	inside the ip stream find src dst port stream (tcp stream)
 				 *	if not found add to tc stream map in the ip stream
 				 *   update seq and ack no
-				 *   
-				 *   
+				 *
+				 *
 				 ******************************************************************/
 
 				std::string ip_str = src + ":" + dst; /* converting and cancatenating src ip and dst ip*/
@@ -281,6 +299,7 @@ int Tcp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 	send_analysis_message_GUI(getJSON_string_from_jsonC(j_json_progress));
 
 	num_files_read++;
+	closeBinMap();
 	return 0;
 } /*function ending*/
 
@@ -372,4 +391,66 @@ std::string Tcp_Analyzer::printToJson()
 	root["type"] = "tcp_result";
 
 	return getJSON_string_from_jsonC(root);
+}
+
+
+/*head == pcap packet header*/
+/*data == data part of the packet*/
+
+void Tcp_Analyzer::createOutputDir(std::string srcIP, std::string dstIP, uint32_t srcPort, uint32_t dstPort, const u_char* data , struct pcap_pkthdr* head)
+{
+	
+	const char dir_path_[] = "tcpBin";
+
+	if (!boost::filesystem::is_directory(dir_path_)) /*if the directory doesnt exist then create the directory*/
+	{
+		boost::filesystem::path dir(dir_path_);
+		boost::filesystem::create_directory(dir);
+	}
+	
+	writeToBin(srcIP, dstIP, srcPort, dstPort, data, head);
+
+	
+
+}
+
+void Tcp_Analyzer::writeToBin(std::string srcIP, std::string dstIP, uint32_t srcPort, uint32_t dstPort, const u_char* data , struct pcap_pkthdr* head)
+{
+	std::string src_port_string = std::to_string(srcPort);
+	std::string dst_port_string = std::to_string(dstPort);
+	std::string binfileName = srcIP + "_" + dstIP + "_" + src_port_string + "_" + dst_port_string + ".pcap";
+	std::string pathfull = "tcpBin\\" + binfileName;
+	std::ofstream* outFile;
+	
+
+	if(binMap.find(binfileName) == binMap.end()) /*if the file name is not found in the map*/
+	{
+		
+		outFile = new std::ofstream(pathfull, std::ios::binary);	
+		outFile->write((char*)globalHeader, sizeof(globalHeader));
+		binMap[binfileName] =  outFile;
+
+	}
+	else /*if found*/
+	{
+		outFile = binMap[binfileName];
+		
+	}
+	outFile->write((char*)head, sizeof(*head));
+	/*cout << sizeof(*head);*/
+	outFile->write((char*)data, head->len);
+	//cout << head;
+
+}
+
+
+void Tcp_Analyzer::closeBinMap()
+{
+	int k = binMap.size();
+
+	for (auto it = binMap.begin(); it != binMap.end(); ++it)
+	{
+		it->second->close();
+	}
+
 }

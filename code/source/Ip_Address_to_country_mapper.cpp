@@ -124,7 +124,7 @@ jsonnlohmann Ip_Address_to_country_mapper::analyze(jsonnlohmann input_json)
 
 	Check_internet check;
 
-	bool checkI = check.checkInternet(); //check Internet connected or not
+	bool checkI = false;//check.checkInternet(); //check Internet connected or not
 
 	if (myfile.is_open())
 	{

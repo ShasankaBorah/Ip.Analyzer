@@ -97,7 +97,7 @@ void Icmp_stream::update_icmp_pair_info(int sequence_received, int request_type_
 	// add one more var to icmp_pair for unsupported type and set if that value comes. normally it shoudln't
 	/*icmp_pair newPair;*/
 
-	if(sequence_received == 9984)
+	if(sequence_received == 33608)
 	{
 		std::cout << "hello"<<std::endl;
 	}
@@ -152,7 +152,7 @@ void Icmp_stream::update_icmp_pair_info(int sequence_received, int request_type_
 			{
 				continue;
 			}
-			else if (it.sequence_number == item.sequence_number) // sequence number found
+			else if (it.sequence_number == item.sequence_number) // if sequence number of item and it are same 
 			{		
 				if ((it.request == true && item.request == true)|| (it.reply == true && item.reply == true)) //if type is same
 				{			
@@ -162,9 +162,9 @@ void Icmp_stream::update_icmp_pair_info(int sequence_received, int request_type_
 				{
 					if (it.request == true && item.reply == true) //check it type and item type 
 					{
-						int reqSec = ((it.reqTimeStamp + 500) / 1000);
-						int repSec = ((item.repTimeStamp + 500) / 1000);
-						int diff = repSec - reqSec;
+						int requestSec = ((it.reqTimeStamp + 500) / 1000);
+						int replySec = ((item.repTimeStamp + 500) / 1000);
+						int diff = replySec - requestSec;
 						if (diff <= 60)
 						{
 							flag = true;
@@ -177,11 +177,11 @@ void Icmp_stream::update_icmp_pair_info(int sequence_received, int request_type_
 						}
 
 					}
-					else if (it.reply == 0 && item.request == 8)
+					else if (it.reply == true && item.request == true)
 					{
-						int reqSec = ((item.reqTimeStamp + 500) / 1000);
-						int repSec = ((it.repTimeStamp + 500) / 1000);
-						int diff = repSec - reqSec;
+						int requestSec = ((item.reqTimeStamp + 500) / 1000);
+						int replySec = ((it.repTimeStamp + 500) / 1000);
+						int diff = replySec - requestSec;
 						if(diff <= 60)
 						{
 							flag = true;

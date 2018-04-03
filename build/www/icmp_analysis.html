@@ -92,11 +92,12 @@
             });
 
             /******************************************pager options*********************************/
-            var pagerOptions = {container: $("#pager"),
-            page: 0,
-            size: 50,
-            savePages : false,
-        };
+            var pagerOptions = {
+                container: $("#pager"),
+                page: 0,
+                size: 50,
+                savePages: false,
+            };
             /*******************************************************************************************/
 
             /**********************************this is the table sorter and pager code******************************************/
@@ -985,7 +986,37 @@
                     str += '<td>' + (diffInTime.hours() > 0 ? diffInTime.hours() + ' hrs ' : '') + (diffInTime.minutes() > 0 ? diffInTime.minutes() + ' mins ' : '') + (diffInTime.seconds() > 0 ? diffInTime.seconds() + ' seconds ' : '') + (diffInTime.milliseconds() + ' msecs') + '</td>';
                 }
                 else {
-                    str += '<tr>';
+                    // let found = false;
+                    // for(let z= 0 ; z < sequence_data.length ; z++)
+                    // {
+                    //     if(sequence_data[k].sequence_no == sequence_data[z].sequence_no)
+                    //     {
+                    //         found = true;
+                    //     }
+
+                    //     if(found)
+                    //     {
+                    //         str += '<tr class="red">';
+                    //         break;
+                    //     }
+                    //     else{
+                    //         str += '<tr>';
+                    //     }
+                    // }
+                    if (k > 0) {
+                        if (sequence_data[k].sequence_no == sequence_data[k - 1].sequence_no) {
+                            str += '<tr class="red">';
+                       }
+                        else {
+                            str += '<tr>';
+                        }
+                    }
+                    else
+                    {
+                        str += '<tr>';
+                    }
+
+                    //str += '<tr>';
                     str += '<td>' + (k + 1) + '</td>';
                     str += '<td>' + sequence_data[k].sequence_no + '</td>';
 
