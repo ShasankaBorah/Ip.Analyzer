@@ -87,18 +87,18 @@ private:
 		} un;
 	};
 	
-	static const int PCAP_FILE_HEADER_LENGTH = 24;
+	//static const int PCAP_FILE_HEADER_LENGTH = 24;
 
-	 unsigned char globalHeader[PCAP_FILE_HEADER_LENGTH] =
-	{ 212, 195, 178, 161, // Magic number
-		02, 00,    // Major version
-		04, 00,    // Minor version
-		0,0,0,0,0,0,0,0,  // Time zone, Timestamp accuracy
-		0, 0, 4, 0,  // Shapshot length
-		1,0,0,0                // Link layer type
-	};
+	// unsigned char globalHeader[PCAP_FILE_HEADER_LENGTH] =
+	//{ 212, 195, 178, 161, // Magic number
+	//	02, 00,    // Major version
+	//	04, 00,    // Minor version
+	//	0,0,0,0,0,0,0,0,  // Time zone, Timestamp accuracy
+	//	0, 0, 4, 0,  // Shapshot length
+	//	1,0,0,0                // Link layer type
+	//};
 
-	
+	 std::vector<Tcp_stream>				tcp_streams_vector;
 	std::map<std::string, Ip_stream*> ip_streams_map;
 	std::vector<boost::filesystem::path> fl_files_; /*fl files read*/
 	std::vector<boost::filesystem::path> rl_files_;/*rl files read*/
@@ -109,7 +109,7 @@ private:
 	
 	jsonnlohmann root = jsonnlohmann::object(); //to make root a json array
 	int process(std::pair<std::string, std::string> item, bool is_fl); // main process function to process the files with each packet
-	std::map<std::string, std::ofstream*> binMap;
+	//std::map<std::string, std::ofstream*> binMap;
 
 
 public:
@@ -119,10 +119,10 @@ public:
 	int32_t start_analysis();
 	void store_database();
 	std::string printToJson();
-	void createOutputDir(std::string srcIP, std::string dstIP, uint32_t srcPort, uint32_t dstPort, const u_char* data, struct pcap_pkthdr* head); /*creates outpiut directory and then calls writeToBin*/
-	void writeToBin(std::string srcIP , std::string dstIP , uint32_t srcPort , uint32_t dstPort , const u_char* data, struct pcap_pkthdr* head);
-	//bool checkTcpOutputDir();
-	void closeBinMap();
+	//void createOutputDir(std::string srcIP, std::string dstIP, uint32_t srcPort, uint32_t dstPort, const u_char* data, struct pcap_pkthdr* head); /*creates outpiut directory and then calls writeToBin*/
+	//void writeToBin(std::string srcIP , std::string dstIP , uint32_t srcPort , uint32_t dstPort , const u_char* data, struct pcap_pkthdr* head);
+	////bool checkTcpOutputDir();
+	//void closeBinMap();
 	
 };
 

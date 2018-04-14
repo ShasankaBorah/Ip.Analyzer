@@ -5,6 +5,7 @@
 #include "Dns_Analyzer.h"
 #include "Protocol_analyzer.h"
 #include "Ip_Address_to_country_mapper.h"
+#include "Tcp_Stream_Writer.h"
 #include <iostream>
 #include <conio.h>
 #include <string>
@@ -34,6 +35,7 @@ Configuration config;
 pcapPackAnalyzer filesToAnalyze;
 Icmp_Analyzer icmp_analyze;
 Tcp_Analyzer tcp_analyze;
+Tcp_Stream_Writer tcp_stream_writer;
 Dns_Analyzer dns_analyze;
 Protocol_analyzer protocol_analyze;
 Ip_Address_to_country_mapper ip_address_resolve;
@@ -196,10 +198,14 @@ void callback(const std::string& uri, const std::string& str)
 
 	if(tokens.size() == 1)
 	{		
+		if(tokens.at(0).compare("save_pairs_") == 0)
+		{
+			filesToAnalyze.printPairs();
+		}
 		/********************************************
 		 *to load full database in each analysis nav
 		 *********************************************/
-		if(tokens.at(0).compare("get_icmp_database_all") == 0)
+		else if(tokens.at(0).compare("get_icmp_database_all") == 0)
 		{
 			std::cout << "Getting icmp database..." << std::endl;
 			std::string load_icmp_database_all_json = get_database_data_all("icmp");
@@ -255,6 +261,9 @@ void callback(const std::string& uri, const std::string& str)
 		{
 			tcp_analyze.initialize();
 			tcp_analyze.start_analysis();
+
+			tcp_stream_writer.initialize();
+			tcp_stream_writer.start_write_analysis();
 
 			std::string result = tcp_analyze.printToJson();
 			server_instance.send_data("/ws/command", result);		

@@ -136,5 +136,6 @@ public:
 	void			add_fl_protocol_file(std::string);
 	void			add_rl_protocol_file(std::string);
 	//std::string		sizeCalculate(uint32_t size);
+	void			printPairs();
 };
 

@@ -214,3 +214,14 @@ int stream::equals(const stream &that)  const
 	else 
 		return 2;
 }
+
+std::set<std::string> stream::getFolderFL()
+{
+	return folders_FL;
+}
+
+std::set<std::string> stream::getFolderRL()
+{
+	return folders_RL;
+}
+

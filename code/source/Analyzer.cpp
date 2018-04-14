@@ -453,3 +453,105 @@ std::string pcapPackAnalyzer::printToJSON()
 	return getJSON_string_from_jsonC(j_root);
 }
 
+
+void pcapPackAnalyzer::printPairs()
+{
+	jsonnlohmann j_pairRoot;
+	
+	std::map<std::string, std::set<std::string>> fl_rl_pair_map;
+
+	for (int i = 0; i < streams.size(); i++)
+	{
+		
+		if(streams.at(i).getFolderFL().size() >= 1)
+		{
+			std::set<std::string> setFL = streams.at(i).getFolderFL();		
+			for(auto it = setFL.begin() ; it != setFL.end() ; ++it)
+			{
+				std::set<std::string> rlFiles;
+				//search for key if not found then add else check rl folder
+				if(fl_rl_pair_map.find(*it) == fl_rl_pair_map.end() ) //not found
+				{
+					
+					if (streams.at(i).getFolderRL().size() >= 1)
+					{
+
+						std::set<std::string> setRL = streams.at(i).getFolderRL();
+
+						for (auto itr = setRL.begin(); itr != setRL.end(); ++itr)
+						{
+							rlFiles.insert(*itr);
+						}
+					}
+
+					fl_rl_pair_map[*it] = rlFiles;				
+				}	
+				else//if key  found
+				{
+					if (streams.at(i).getFolderRL().size() >= 1)
+					{
+						std::set<std::string> newSet1 = streams.at(i).getFolderRL();
+						for (auto itr = newSet1.begin(); itr != newSet1.end(); ++itr)
+						{
+							if(fl_rl_pair_map[*it].find(*itr) == fl_rl_pair_map[*it].end()) //if value not found in the set
+							{
+								fl_rl_pair_map[*it].insert(*itr);
+							}
+						}
+					}						
+				}
+			}		
+		}
+		else
+		{
+			continue;
+		}
+	}
+
+
+	for(auto mapItr = fl_rl_pair_map.begin() ; mapItr != fl_rl_pair_map.end() ; ++mapItr )
+	{
+		jsonnlohmann j_pairJson;
+		j_pairJson["Fl_file"] = mapItr->first;
+		if(mapItr->second.size() != 0)
+		{
+			jsonnlohmann j_rl_files;
+			for(auto itrSet = mapItr->second.begin() ; itrSet != mapItr->second.end() ; ++itrSet)
+			{
+				
+				j_pairJson["Rl_file"].push_back(*itrSet);
+			}
+			j_rl_files.clear();		
+		}
+		else
+		{
+			j_pairJson["Rl_file"] = "NO RL FILE";
+
+		}
+		j_pairRoot.push_back(j_pairJson);
+		j_pairJson.clear();
+		
+	}
+
+	time_t rawtime;
+	struct tm * timeinfo;
+	char buffer[80];
+
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+
+	strftime(buffer, sizeof(buffer), "%Y-%m-%d-%I-%M-%S", timeinfo);
+	std::string str(buffer);
+
+	str += "_pair.json";
+
+	std::ofstream ofs(str);
+	ofs << j_pairRoot;
+	ofs.close();
+	j_pairRoot.clear();
+	
+
+
+
+}
+

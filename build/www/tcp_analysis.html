@@ -88,7 +88,7 @@
             var pagerOptions = {
                 container: $("#pager"),
                 page: 0,
-                size: 50,
+                size: 20,
                 savePages: false,
             };
             /*******************************************************************************************/
@@ -181,7 +181,7 @@
             limit = Math.min(table_data.length, limit);
             // display_req_rep_pairs_only();
             display_stream_data(start, limit);
-            $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
+            //$('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
         }
 
         function display_stream_data(start, limit) { //display of main data contents in the table
@@ -359,14 +359,14 @@
                     limit = Math.min(g_data_pair_only.length, limit);
                     table_result.empty();
                     funct_to_load_two_way_pairs(next_pairs, limit);
-                    $('#p_table_result_info').html((next_pairs + 1) + '-' + limit + '(' + max_size + ')');
+                   // $('#p_table_result_info').html((next_pairs + 1) + '-' + limit + '(' + max_size + ')');
                 }
             } else if (max_size > next) {
                 limit = limit + rows_per_page;
                 limit = Math.min(table_data.length, limit);
                 table_result.empty();
                 display_stream_data(next, limit);
-                $('#p_table_result_info').html((next + 1) + '-' + limit + '(' + max_size + ')');
+               // $('#p_table_result_info').html((next + 1) + '-' + limit + '(' + max_size + ')');
             }
         }
 
@@ -387,7 +387,7 @@
                 }
                 table_result.empty();
                 funct_to_load_two_way_pairs(prev_two_way, limit);
-                $('#p_table_result_info').html((prev_two_way + 1) + '-' + limit + '(' + max_size + ')');
+                //$('#p_table_result_info').html((prev_two_way + 1) + '-' + limit + '(' + max_size + ')');
 
 
             } else {
@@ -408,7 +408,7 @@
                 }
                 table_result.empty();
                 display_stream_data(prev, limit);
-                $('#p_table_result_info').html((prev + 1) + '-' + limit + '(' + max_size + ')');
+               // $('#p_table_result_info').html((prev + 1) + '-' + limit + '(' + max_size + ')');
             }
         }
 
@@ -422,7 +422,7 @@
             limit = Math.min(max_size, limit);
             //display_stream_data(start, limit);
             funct_to_load_two_way_pairs(start, limit);
-            $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
+            //$('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
         }
 
         function funct_to_load_two_way_pairs(start, limit) // function to load two way data called by load_2_way_streams() function
@@ -450,7 +450,7 @@
             two_way_only = false;
             max_size = table_data.length;
             display_stream_data(start, limit);
-            $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
+           // $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
         }
     </script>
 
@@ -519,9 +519,9 @@
             </div>
             
             <!-- data display table -->
-            <div class="row">
-                <button class="btn" id="btn_table_result_prev" onclick="load_table_result_prev()">Prev</button>
-                <button class="btn" id="btn_table_result_next" onclick="load_table_result_next()">Next</button>
+            <div class="row pager" id="pager">
+                <button class="btn-small waves-effect waves-light prev" id="btn_table_result_prev" >Prev</button>
+                <button class="btn-small waves-effect waves-light next" id="btn_table_result_next" >Next</button>
                 <p id="p_table_result_info"></p>
             </div>
 
@@ -529,8 +529,8 @@
 
 
             <div class="row">
-                <div class="col s5">
-                    <table id="table_result_tcp" class="tablesorter-default">
+                <div class="col s5" style="overflow-y: scroll; height:500px">
+                    <table id="table_result_tcp" class="tablesorter-default" >
                         <thead>
                             <tr>
                                 <th>#</th>

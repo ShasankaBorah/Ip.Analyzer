@@ -53,5 +53,7 @@ public:
     void add_pcap_file_FL(string str);
     void add_pcap_file_RL(string str);
 	int equals(const stream &that) const;
+	std::set<std::string> getFolderFL();
+	std::set<std::string> getFolderRL();
 };
 
