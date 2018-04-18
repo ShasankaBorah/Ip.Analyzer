@@ -264,6 +264,7 @@ void callback(const std::string& uri, const std::string& str)
 
 			tcp_stream_writer.initialize();
 			tcp_stream_writer.start_write_analysis();
+			tcp_stream_writer.writePcapDataToJson();
 
 			std::string result = tcp_analyze.printToJson();
 			server_instance.send_data("/ws/command", result);		
@@ -606,6 +607,10 @@ jsonnlohmann read_database_file(std::string read_file,std::string type) /*to rea
 
 //main Function
 int main(int argc, char* argv[]) {
+
+	/*std::string tsarkStart = "\"C:\\Program Files\\Wireshark\\tshark.exe\"  -r C:\\Users\\shasa\\Documents\\GitHub\\Ip.Analyzer\\build\\tcpAnalysisData\\tcpBin\\13.75.119.249_192.168.1.101_443_55953.pcap -Tfields -e tcp.seq -e tcp.ack ";
+
+	system(tsarkStart.c_str());*/
 
 	config.read();
 

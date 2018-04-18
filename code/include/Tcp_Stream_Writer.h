@@ -69,6 +69,7 @@ public:
 	void closeBinMap();
 	int tcp_equals(const Tcp_Stream_Writer& that) const;
 	void writeToBin(std::string srcIP, std::string dstIP, uint32_t srcPort, uint32_t dstPort, const u_char* data, struct pcap_pkthdr* header);
+	void writePcapDataToJson();
 	
 
 

@@ -120,7 +120,7 @@ private:
     void										store_database();
 	float										totalSecondsElapsed = 0;
 	bool										isChecked;
-	int process(std::pair<std::string, std::string> item, bool is_fl); // main processing function
+	int											process(std::pair<std::string, std::string> item, bool is_fl); // main processing function
 	
 public:	
 	pcapPackAnalyzer(std::string);  //constructor
@@ -136,6 +136,6 @@ public:
 	void			add_fl_protocol_file(std::string);
 	void			add_rl_protocol_file(std::string);
 	//std::string		sizeCalculate(uint32_t size);
-	void			printPairs();
+	void			printPairs(); // this funcktion is used to print the pairs obtained from the analysis into the json file
 };
 

@@ -16,3 +16,5 @@ workspace/.vs/ip_assembler/v14/.suo
 *.opendb
 *.ipdb
 *.txt
+*.png
+*.pcap

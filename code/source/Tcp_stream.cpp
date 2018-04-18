@@ -69,6 +69,29 @@ void Tcp_stream::increment_tcp_dst_src()
 	dst_src++;
 }
 
+int Tcp_stream::getSrcDstCount()
+{
+	return src_dst;
+}
+
+int Tcp_stream::getDstSrcCount()
+{
+	return dst_src;
+}
+
+
+std::string Tcp_stream::getSrcIP()
+{
+	return tcp_srcIP;
+}
+
+
+std::string Tcp_stream::getDstIP()
+{
+	return tcp_dstIP;
+}
+
+
 void Tcp_stream::add_folder_FL(string str) {
 	folders_FL.insert(str);
 }
@@ -133,12 +156,38 @@ jsonnlohmann Tcp_stream::get_statistics()
 {
 	jsonnlohmann root;
 
-	root["srcIP"]				= tcp_srcIP;
-	root["dstIP"]				= tcp_dstIP;
-	root["src_dst"]				= src_dst;
-	root["dst_src"]				= dst_src;
+	root["srcIP"]				= getSrcIP();
+	root["dstIP"]				= getDstIP();
+	root["src_dst"]				= getSrcDstCount();
+	root["dst_src"]				= getDstSrcCount();
 
-	for(auto it = tcp_streams_map.begin() ; it!= tcp_streams_map.end() ; ++it)
+	std::string str;
+
+	//FL file iterator
+	for (auto it = pcap_files_FL.begin(); it != pcap_files_FL.end(); ++it) 
+	{
+		str = it->filename().string();
+		if (str.front() == '"') {
+			str.erase(0, 1);  //algo to remove quote
+			str.erase(str.size() - 1);
+		}
+		root["files_FL"].push_back(str);
+		str.clear();
+	}
+
+	//RL file Iterator
+	for (auto it = pcap_files_RL.begin(); it != pcap_files_RL.end(); ++it) 
+	{
+		str = it->filename().string();
+		if (str.front() == '"') {
+			str.erase(0, 1);  //algo to remove quote
+			str.erase(str.size() - 1);
+		}
+		root["files_RL"].push_back(str);
+		str.clear();
+	}
+
+	/*for(auto it = tcp_streams_map.begin() ; it!= tcp_streams_map.end() ; ++it)
 	{
 		jsonnlohmann j_inner_root;
 		jsonnlohmann j_src_port;
@@ -154,16 +203,13 @@ jsonnlohmann Tcp_stream::get_statistics()
 		jsonnlohmann acknowledgement(it->second->get_ack_num());
 		root["ack_num"] = acknowledgement;
 
-	}
+	}*/
 
 	std::ofstream o("pretty.json");
 
 	o << root;
 	o.close();
 	return root;
-
-	
-
 }
 
 

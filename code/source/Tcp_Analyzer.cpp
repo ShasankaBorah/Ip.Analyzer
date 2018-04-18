@@ -282,7 +282,6 @@ int Tcp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 					case 1: /*means destination to source*/
 						found = true;
 						tcp_streams_vector.at(i).increment_tcp_dst_src();
-						
 						tcp_streams_vector.at(i).update(src_dst_port_str, se_no, ack_no);
 						if (is_fl)
 						{
@@ -305,8 +304,7 @@ int Tcp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 				}//for loop ends
 				if(!found)
 				{
-					new_tcp_streams.increment_tcp_src_dst();
-					
+					new_tcp_streams.increment_tcp_src_dst();				
 					new_tcp_streams.update(src_dst_port_str, se_no, ack_no);
 					
 					if (is_fl)
@@ -321,9 +319,6 @@ int Tcp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 					}
 					tcp_streams_vector.push_back(new_tcp_streams);
 				}
-
-
-
 
 				//Ip_stream* ip_stream;
 				//if (ip_streams_map.find(ip_str) == ip_streams_map.end()) //if not found
@@ -428,7 +423,6 @@ void Tcp_Analyzer::store_database()
 			j_files["rl_files"].push_back(TotalRLFilesWQuotes);
 		}
 		root["data_info"].push_back(j_files);
-
 		j_files.clear();
 
 		for (auto it = tcp_streams_vector.begin(); it != tcp_streams_vector.end(); ++it)

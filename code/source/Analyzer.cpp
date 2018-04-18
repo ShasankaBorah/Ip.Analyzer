@@ -471,11 +471,9 @@ void pcapPackAnalyzer::printPairs()
 				std::set<std::string> rlFiles;
 				//search for key if not found then add else check rl folder
 				if(fl_rl_pair_map.find(*it) == fl_rl_pair_map.end() ) //not found
-				{
-					
+				{				
 					if (streams.at(i).getFolderRL().size() >= 1)
 					{
-
 						std::set<std::string> setRL = streams.at(i).getFolderRL();
 
 						for (auto itr = setRL.begin(); itr != setRL.end(); ++itr)
@@ -528,7 +526,7 @@ void pcapPackAnalyzer::printPairs()
 			j_pairJson["Rl_file"] = "NO RL FILE";
 
 		}
-		j_pairRoot.push_back(j_pairJson);
+		j_pairRoot["Pair_info"].push_back(j_pairJson);
 		j_pairJson.clear();
 		
 	}
@@ -549,9 +547,6 @@ void pcapPackAnalyzer::printPairs()
 	ofs << j_pairRoot;
 	ofs.close();
 	j_pairRoot.clear();
-	
-
-
-
+	send_message_GUI("pair file saved");
 }
 

@@ -49,6 +49,10 @@ function initialise() {
 
   ws_message = new WebSocket("ws://" + host + "/ws/message");
   ws_message.onmessage = function (evt) {
+    if(evt.data == "pair file saved")
+    {
+      $('#btn_save_pairs_info_to_file').removeClass('disabled');
+    }
     Materialize.toast(evt.data, 1000);
   }
 
@@ -705,7 +709,6 @@ function searchipFunction() {
 
 function save_pairs_info_to_file()
 {
+    $('#btn_save_pairs_info_to_file').addClass('disabled');
     ws_command.send("save_pairs_");
-
-  
 }

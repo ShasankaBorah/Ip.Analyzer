@@ -54,12 +54,40 @@ Tcp_Stream_Writer::Tcp_Stream_Writer(std::string s_IP, std::string d_IP)
 
 void Tcp_Stream_Writer::initialize()
 {
-	const char dir_path_[] = "tcpBin";
-	if (!boost::filesystem::is_directory(dir_path_)) /*if the directory doesnt exist then create the directory*/
+	std::vector<std::string> directoryVec;
+	
+	directoryVec.push_back("tcpBin");
+	directoryVec.push_back("tcpJson");
+
+	for(auto itr = directoryVec.begin() ; itr != directoryVec.end() ; ++itr)
 	{
-		boost::filesystem::path dir(dir_path_);
-		boost::filesystem::create_directory(dir);
+		std::string path_ = "tcpAnalysisData\\" + *itr;
+		const char* dir_path_ = path_.c_str();
+
+		if (!boost::filesystem::is_directory(dir_path_)) /*if the directory doesnt exist then create the directory*/
+		{
+			boost::filesystem::path dir(dir_path_);
+			boost::filesystem::create_directories(dir);
+			if (is_directory(dir))
+			{
+				cout << "created" << std::endl;
+			}
+			else
+			{
+				cout << "no" << std::endl;
+			}
+		}
+		
 	}
+	/*std::string path_ = "tcpAnalaysis\\tcpJson";*/
+	
+	/*const char* dir_path_ = path_.c_str();*/
+	
+	/*std::string innerPath_ = "tcpAnalysis\\tcpBin";
+	const char* dir_inner_path_ = innerPath_.c_str()*/
+
+	
+	
 	
 }
 
@@ -130,6 +158,7 @@ int32_t Tcp_Stream_Writer::start_write_analysis()
 
 	return 0;
 }
+
 
 int Tcp_Stream_Writer::process(std::pair<std::string, std::string> item, bool is_fl)
 {
@@ -305,8 +334,6 @@ int Tcp_Stream_Writer::process(std::pair<std::string, std::string> item, bool is
 }
 
 
-
-
 int Tcp_Stream_Writer::tcp_equals(const Tcp_Stream_Writer& that) const
 {
 	if ((strcmp(tcp_srcIP.c_str(), that.tcp_srcIP.c_str()) == 0) && (strcmp(tcp_dstIP.c_str(), that.tcp_dstIP.c_str()) == 0))/* A to B */
@@ -322,7 +349,7 @@ void Tcp_Stream_Writer::writeToBin(std::string srcIP, std::string dstIP, uint32_
 	std::string src_port_string = std::to_string(srcPort);
 	std::string dst_port_string = std::to_string(dstPort);
 	std::string binfileName = srcIP + "_" + dstIP + "_" + src_port_string + "_" + dst_port_string + ".pcap";
-	const std::string pathfull = "tcpBin\\" + binfileName;
+	const std::string pathfull = "tcpAnalysisData\\tcpBin\\" + binfileName;
 	std::ofstream* outFile;
 
 
@@ -340,9 +367,7 @@ void Tcp_Stream_Writer::writeToBin(std::string srcIP, std::string dstIP, uint32_
 
 	}
 	outFile->write((char*)header, sizeof(*header));
-	/*cout << sizeof(*head);*/
 	outFile->write((char*)data, header->len);
-	//cout << head;
 }
 
 void Tcp_Stream_Writer::closeBinMap()
@@ -354,4 +379,22 @@ void Tcp_Stream_Writer::closeBinMap()
 		it->second->close();
 	}
 
+}
+
+void Tcp_Stream_Writer::writePcapDataToJson()
+{
+	for(auto it = binMap.begin() ; it != binMap.end() ; ++it)
+	{
+		std::string tsharkStartString = "\"C:\\Program Files\\Wireshark\\tshark.exe\" -r tcpAnalysisData\\tcpBin\\";
+		std::string tsharkFilterString = " -t d -Tjson -e frame.time -e tcp.seq -e tcp.ack -e tcp.len -e tcp.srcport -e tcp.dstport -e tcp.flags > ";
+		
+		std::size_t found = it->first.find_last_of("."); //separating src and dst port
+		std::string str = it->first.substr(0, found);
+		std::string jsonFileName = "tcpAnalysisData\\tcpJson\\" + str + ".json";
+
+		std::string tsharkCommandString = tsharkStartString + it->first + tsharkFilterString + jsonFileName;
+
+		system(tsharkCommandString.c_str());
+
+	}
 }
