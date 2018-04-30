@@ -247,11 +247,15 @@ int Tcp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 				 *   update seq and ack no
 				 ******************************************************************/
 
-				std::string ip_str = src + ":" + dst; /* converting and cancatenating src ip and dst ip*/
 
-				std::string src_dst_port_str = src_port_str + ":" + dst_port_str; /*cancatinating src and dst port*/
+				std::string src_port_ip = src + ":" + src_port_str;
+				std::string dst_port_ip = dst + ":" + dst_port_str;
+				
+				//std::string ip_str = src + ":" + dst; /* converting and cancatenating src ip and dst ip*/
 
-				Tcp_stream new_tcp_streams(src , dst); /*creating  a new tcp stream*/
+				std::string src_dst_port_str = src_port_str + "_" + dst_port_str; /*cancatinating src and dst port*/
+
+				Tcp_stream new_tcp_streams(src_port_ip , dst_port_ip); /*creating  a new tcp stream*/
 				
 				int retVal = NULL;;
 
@@ -265,7 +269,7 @@ int Tcp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 					case 0: /*means src to destination*/
 						found = true;
 						tcp_streams_vector.at(i).increment_tcp_src_dst();
-						tcp_streams_vector.at(i).update(src_dst_port_str, se_no, ack_no);
+						//tcp_streams_vector.at(i).update(src_dst_port_str, se_no, ack_no);
 						if (is_fl)
 						{
 							tcp_streams_vector.at(i).add_folder_FL(folder);
@@ -282,7 +286,7 @@ int Tcp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 					case 1: /*means destination to source*/
 						found = true;
 						tcp_streams_vector.at(i).increment_tcp_dst_src();
-						tcp_streams_vector.at(i).update(src_dst_port_str, se_no, ack_no);
+						//tcp_streams_vector.at(i).update(src_dst_port_str, se_no, ack_no);
 						if (is_fl)
 						{
 							tcp_streams_vector.at(i).add_folder_FL(folder);
@@ -305,7 +309,7 @@ int Tcp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 				if(!found)
 				{
 					new_tcp_streams.increment_tcp_src_dst();				
-					new_tcp_streams.update(src_dst_port_str, se_no, ack_no);
+					//new_tcp_streams.update(src_dst_port_str, se_no, ack_no);
 					
 					if (is_fl)
 					{

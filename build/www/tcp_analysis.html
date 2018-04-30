@@ -47,6 +47,7 @@
                         <button class="btn col s1" id="btn_start_tcp_analysis" onclick="start_tcp_analysis()">TCP Analysis</button>
                         <button class="btn col s1" id="btn_load_two_way_tcp" onclick="load_two_way_tcp()">Load Two Way</button>
                         <button class="btn col s1" onclick="load_all_tcp_streams()">Reset</button>
+                        <button class="btn col s1" onclick="get_ip_json_data()">Get Json</button>
                         <div class="input-field col s3">
                             <select id="select_db_list"></select>
                             <label>Available Databases</label>
@@ -65,7 +66,6 @@
             <div>
                 <p id="total_time_elapsed"></p>
             </div>
-
 
             <div class="row">
                 <h6>Number of Files Read :
@@ -103,13 +103,16 @@
 
 
             <div class="row">
-                <div class="col s5" style="overflow-y: scroll; height:500px">
+                <div class="col s6" style="overflow-y: scroll; height:500px">
                     <table id="table_result_tcp" class="tablesorter-default" >
                         <thead>
                             <tr>
+                                <!-- <th>Select</th> -->
                                 <th>#</th>
                                 <th>Source IP</th>
                                 <th>Destination IP</th>
+                                <th>Src to Dst</th>
+                                <th>Dst to Src</th>
                                 <th>FL File</th>
                                 <th>RL File</th>
                             </tr>
@@ -118,7 +121,26 @@
                     </table>
                 </div>
 
-                <div id="result"> </div>
+                <div class="col s6" style="overflow-y: scroll; height:500px">
+                    <table id="json_result_clicked">
+                        <thead>
+                            <tr>
+                                    <th>Frame Time</th>
+                                    <th>Tcp Seq</th>
+                                    <th>Tcp Ack</th>
+                                    <th>Tcp Len</th>
+                                    <th>Tcp SrcPort</th>
+                                    <th>Tcp DstPort</th>
+                                    <th>flag</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+
+                    </table>
+
+                </div>
+
+                <!-- <div id="result"> </div>
                 <div class="col s6">
                     <div class="row">
                         <div class="col s6">
@@ -132,9 +154,9 @@
                                 <span id="p_seq_dst" />
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
-                    <div class="row">
+                    <!-- <div class="row">
                         <div class="col s12">
                             <table id="table_sequence" class="bordered highlight">
                                 <thead>
@@ -150,7 +172,7 @@
                                 <tbody></tbody>
                             </table>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>

@@ -6,6 +6,7 @@
 #include "Protocol_analyzer.h"
 #include "Ip_Address_to_country_mapper.h"
 #include "Tcp_Stream_Writer.h"
+#include "GetTcpJsonDetailsGui.h"
 #include <iostream>
 #include <conio.h>
 #include <string>
@@ -30,6 +31,7 @@ namespace pt = boost::posix_time;
 namespace ptree = boost::property_tree;
 using jsonnlohmann = nlohmann::json;
 
+GetTcpJsonDetailsGui getTcpJsonDetailsGui;
 WebServer server_instance;
 Configuration config;
 pcapPackAnalyzer filesToAnalyze;
@@ -50,6 +52,8 @@ std::ofstream* pcap_to_json;
 std::string load_pcap_folder_list(std::string fl_path, std::string rl_path);
 std::string getJSON_string_from_jsonC(jsonnlohmann json);
 jsonnlohmann read_database_file(std::string read_file , std::string type); /*to read the dataabse file containing list of individual database*/
+bool find_file(const path& dir_path, const path& file_name, path& path_found);
+
 
 ptree::ptree getPtree(std::string str)
 {
@@ -68,9 +72,15 @@ void callback(const std::string& uri, const std::string& str)
 	if(2 == tokens.size())
 	{
 		/*start normal pcap analysis*/
+		if(tokens.at(0).compare("getJson") == 0)
+		{
+			std::string str = tokens.at(1);
+			getTcpJsonDetailsGui.getJsonData(str);
+			std::string result = getTcpJsonDetailsGui.jsonToSendToGui();
+			server_instance.send_data("/ws/command", result);
 
-
-		if (tokens.at(0).compare("get_configuration") == 0)
+		}
+		else if (tokens.at(0).compare("get_configuration") == 0)
 		{
 			// send the config
 			// get jsonnlohmann format of the config and send it
@@ -264,7 +274,7 @@ void callback(const std::string& uri, const std::string& str)
 
 			tcp_stream_writer.initialize();
 			tcp_stream_writer.start_write_analysis();
-			tcp_stream_writer.writePcapDataToJson();
+			//tcp_stream_writer.writePcapDataToJson();
 
 			std::string result = tcp_analyze.printToJson();
 			server_instance.send_data("/ws/command", result);		
@@ -608,9 +618,23 @@ jsonnlohmann read_database_file(std::string read_file,std::string type) /*to rea
 //main Function
 int main(int argc, char* argv[]) {
 
-	/*std::string tsarkStart = "\"C:\\Program Files\\Wireshark\\tshark.exe\"  -r C:\\Users\\shasa\\Documents\\GitHub\\Ip.Analyzer\\build\\tcpAnalysisData\\tcpBin\\13.75.119.249_192.168.1.101_443_55953.pcap -Tfields -e tcp.seq -e tcp.ack ";
+	
 
-	system(tsarkStart.c_str());*/
+	/***************************************************test code****************************/
+	
+
+	/*std::string path_ = "tcpAnalysisData\\tcpJson\\";
+	const path myPath = path_.c_str();
+		const path myFile = L"10.10.0.3_10.10.32.119_8014_57842.json";
+		path myFound;
+		bool k = find_file(myPath, myFile, myFound);
+		wcout << myFound << endl;*/
+
+		
+	
+
+	/**************************************************************************************/
+
 
 	config.read();
 

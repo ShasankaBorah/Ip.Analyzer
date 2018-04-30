@@ -76,19 +76,8 @@ void Tcp_Stream_Writer::initialize()
 			{
 				cout << "no" << std::endl;
 			}
-		}
-		
+		}	
 	}
-	/*std::string path_ = "tcpAnalaysis\\tcpJson";*/
-	
-	/*const char* dir_path_ = path_.c_str();*/
-	
-	/*std::string innerPath_ = "tcpAnalysis\\tcpBin";
-	const char* dir_inner_path_ = innerPath_.c_str()*/
-
-	
-	
-	
 }
 
 
@@ -267,43 +256,11 @@ int Tcp_Stream_Writer::process(std::pair<std::string, std::string> item, bool is
 						break;
 					}
 				}//for loop
-				if(!found)
+				if (!found)
 				{
 					tcp_streams_writer_vector.push_back(new_tcp_stream_writer);
-					writeToBin(src, dst , s_port , d_port, data, header);
+					writeToBin(src, dst, s_port, d_port, data, header);
 				}
-
-				//pair_info pair_info(src , s_port , dst , d_port);
-				//	
-				//if(find(tcp_streams_writer_vector.begin(), tcp_streams_writer_vector.end(), pair_info) == tcp_streams_writer_vector.end()) //if not found
-				//{
-				//	outFile = new std::ofstream(pathfull, std::ios::binary);
-				//	outFile->write((char*)globalHeader, sizeof(globalHeader));
-				//	tcp_streams_writer_vector.push_back();
-				//}
-				//else
-				//{
-				//	auto it = find(tcp_streams_writer_vector.begin(), tcp_streams_writer_vector.end(), pair_info) == tcp_streams_writer_vector.end());
-				//}
-
-
-				//if (tcp_streams_writer_vector == binMap.end()) /*if the file name is not found in the map*/
-				//{
-				//	outFile = new std::ofstream(pathfull, std::ios::binary);
-				//	outFile->write((char*)globalHeader, sizeof(globalHeader));
-				//	binMap[pair_info] = outFile;
-
-				//}
-				//else /*if found*/
-				//{
-				//	outFile = binMap[pair_info];
-
-				//}
-				//outFile->write((char*)header, sizeof(*header));
-				///*cout << sizeof(*head);*/
-				//outFile->write((char*)data, header->len);
-				//cout << head;
-
 			}
 		}
 	}
@@ -348,10 +305,14 @@ void Tcp_Stream_Writer::writeToBin(std::string srcIP, std::string dstIP, uint32_
 {
 	std::string src_port_string = std::to_string(srcPort);
 	std::string dst_port_string = std::to_string(dstPort);
-	std::string binfileName = srcIP + "_" + dstIP + "_" + src_port_string + "_" + dst_port_string + ".pcap";
+	std::string binfileName = srcIP + "_" +  src_port_string +"_" + dstIP + "_" + dst_port_string + ".pcap";
 	const std::string pathfull = "tcpAnalysisData\\tcpBin\\" + binfileName;
 	std::ofstream* outFile;
 
+	/*if(binfileName.compare("10.10.0.14_10.10.32.100_2000_15908.pcap") == 0 )
+	{
+		cout << "stop" << std::endl;
+	}*/
 
 	if (binMap.find(binfileName) == binMap.end()) /*if the file name is not found in the map*/
 	{
@@ -364,8 +325,8 @@ void Tcp_Stream_Writer::writeToBin(std::string srcIP, std::string dstIP, uint32_
 	else /*if found*/
 	{
 		outFile = binMap[binfileName];
-
 	}
+
 	outFile->write((char*)header, sizeof(*header));
 	outFile->write((char*)data, header->len);
 }
@@ -376,6 +337,10 @@ void Tcp_Stream_Writer::closeBinMap()
 
 	for (auto it = binMap.begin(); it != binMap.end(); ++it)
 	{
+		/*if (it->first.compare("10.10.0.14_10.10.32.100_2000_15908.pcap") == 0)
+		{
+			cout << "stop" << std::endl;
+		}*/
 		it->second->close();
 	}
 

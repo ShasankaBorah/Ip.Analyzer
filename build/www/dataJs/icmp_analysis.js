@@ -46,10 +46,12 @@
             ws_message.onmessage = function (evt) {
                 Materialize.toast(evt.data, 1000);
             }
+
             table_result = $('#table_result_icmp tbody');
 
             $(table_result).delegate("tr", "click", function (e) {
-                display_seq_data($(e.currentTarget).children(":nth-child(1)").html());
+                   
+                display_seq_data($(e.currentTarget).children(":nth-child(1)").html());    
                 $('#table_result_icmp tr').removeClass('green lighten-2');
                 $(e.currentTarget).addClass('green lighten-2');
             });

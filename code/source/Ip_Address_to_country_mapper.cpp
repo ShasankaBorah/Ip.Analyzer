@@ -144,12 +144,6 @@ jsonnlohmann Ip_Address_to_country_mapper::analyze(jsonnlohmann input_json)
 				std::cerr << e.what() << std::endl;
 			}
 		}
-
-		/*for (auto it = ip_to_country_map.begin(); it != ip_to_country_map.end(); ++it)
-		{
-			std::cout << it.key() << "\n" << std::endl;;
-		}*/
-
 	}
 
 
