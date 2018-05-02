@@ -14,9 +14,19 @@
 #include <json.hpp>
 #include <sstream>
 
-using namespace std;
-using jsonnlohmann = nlohmann::json;
 
+
+/******************************************************************************************************
+ *This class is used to get the json from the individual pcap file that has been generated 
+ *previously using the function writeToBin in th class Tcp_stream_writer.
+ *
+ *File name received fgrom the gui is first checked for the existence in the folder 
+ *if the json is not found then tshark is used to read the respective pcap file and write the 
+ *desired data in the json file
+ ******************************************************************************************************/
+
+using namespace std;
+using					jsonnlohmann = nlohmann::json;
 extern					std::string getJSON_string_from_jsonC(jsonnlohmann json);
 
 GetTcpJsonDetailsGui::GetTcpJsonDetailsGui()
@@ -51,8 +61,7 @@ void GetTcpJsonDetailsGui::getJsonData(std::string str)
 	std::stringstream ss;
 
 	if(i)
-	{
-		
+	{	
 		ss << i.rdbuf();
 		i.close();
 		

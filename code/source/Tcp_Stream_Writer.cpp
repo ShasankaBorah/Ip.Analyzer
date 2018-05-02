@@ -346,20 +346,20 @@ void Tcp_Stream_Writer::closeBinMap()
 
 }
 
-void Tcp_Stream_Writer::writePcapDataToJson()
-{
-	for(auto it = binMap.begin() ; it != binMap.end() ; ++it)
-	{
-		std::string tsharkStartString = "\"C:\\Program Files\\Wireshark\\tshark.exe\" -r tcpAnalysisData\\tcpBin\\";
-		std::string tsharkFilterString = " -t d -Tjson -e frame.time -e tcp.seq -e tcp.ack -e tcp.len -e tcp.srcport -e tcp.dstport -e tcp.flags > ";
-		
-		std::size_t found = it->first.find_last_of("."); //separating src and dst port
-		std::string str = it->first.substr(0, found);
-		std::string jsonFileName = "tcpAnalysisData\\tcpJson\\" + str + ".json";
-
-		std::string tsharkCommandString = tsharkStartString + it->first + tsharkFilterString + jsonFileName;
-
-		system(tsharkCommandString.c_str());
-
-	}
-}
+//void Tcp_Stream_Writer::writePcapDataToJson()
+//{
+//	for(auto it = binMap.begin() ; it != binMap.end() ; ++it)
+//	{
+//		std::string tsharkStartString = "\"C:\\Program Files\\Wireshark\\tshark.exe\" -r tcpAnalysisData\\tcpBin\\";
+//		std::string tsharkFilterString = " -t d -Tjson -e frame.time -e tcp.seq -e tcp.ack -e tcp.len -e tcp.srcport -e tcp.dstport -e tcp.flags > ";
+//		
+//		std::size_t found = it->first.find_last_of("."); //separating src and dst port
+//		std::string str = it->first.substr(0, found);
+//		std::string jsonFileName = "tcpAnalysisData\\tcpJson\\" + str + ".json";
+//
+//		std::string tsharkCommandString = tsharkStartString + it->first + tsharkFilterString + jsonFileName;
+//
+//		system(tsharkCommandString.c_str());
+//
+//	}
+//}

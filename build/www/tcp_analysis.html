@@ -26,7 +26,7 @@
     <link rel="stylesheet" href="libs/tablesorter/css/jquery.tablesorter.pager.min.css">
     <script src="libs/tablesorter/js/jquery.tablesorter.pager.min.js"></script>
 
-   <script type="text/javascript" src="dataJs/tcp_analysis.js"></script>
+    <script type="text/javascript" src="dataJs/tcp_analysis.js"></script>
 
 </head>
 
@@ -91,20 +91,22 @@
                     </table>
                 </div>
             </div>
-            
+
             <!-- data display table -->
             <div class="row pager" id="pager">
-                <button class="btn-small waves-effect waves-light prev" id="btn_table_result_prev" >Prev</button>
-                <button class="btn-small waves-effect waves-light next" id="btn_table_result_next" >Next</button>
+                <button class="btn-small waves-effect waves-light prev" id="btn_table_result_prev">Prev</button>
+                <button class="btn-small waves-effect waves-light next" id="btn_table_result_next">Next</button>
                 <p id="p_table_result_info"></p>
             </div>
 
 
 
 
+
+
             <div class="row">
                 <div class="col s6" style="overflow-y: scroll; height:500px">
-                    <table id="table_result_tcp" class="tablesorter-default" >
+                    <table id="table_result_tcp" class="tablesorter-default">
                         <thead>
                             <tr>
                                 <!-- <th>Select</th> -->
@@ -121,17 +123,32 @@
                     </table>
                 </div>
 
+
                 <div class="col s6" style="overflow-y: scroll; height:500px">
+
+                    <div class="row">
+                        <div class="col s6">
+                            <div>Source IP Address:
+                                <span id="srcIPPortTcp" />
+                            </div>
+                        </div>
+                        <div class="col s6">
+                            <div>Destination IP Address:
+                                <span id="dstIPPortTcp" />
+                            </div>
+                        </div>
+                    </div>
+
                     <table id="json_result_clicked">
                         <thead>
                             <tr>
-                                    <th>Frame Time</th>
-                                    <th>Tcp Seq</th>
-                                    <th>Tcp Ack</th>
-                                    <th>Tcp Len</th>
-                                    <th>Tcp SrcPort</th>
-                                    <th>Tcp DstPort</th>
-                                    <th>flag</th>
+                                <th>Frame Time</th>
+                                <th>Tcp Seq</th>
+                                <th>Tcp Ack</th>
+                                <th>Tcp Len</th>
+                                <th>Tcp SrcPort</th>
+                                <th>Tcp DstPort</th>
+                                <th>flag</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -156,7 +173,7 @@
                         </div>
                     </div> -->
 
-                    <!-- <div class="row">
+                <!-- <div class="row">
                         <div class="col s12">
                             <table id="table_sequence" class="bordered highlight">
                                 <thead>
@@ -173,9 +190,9 @@
                             </table>
                         </div>
                     </div> -->
-                </div>
             </div>
         </div>
+    </div>
     </div>
 </body>
 

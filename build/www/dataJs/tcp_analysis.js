@@ -16,6 +16,8 @@ var limit = rows_per_page;
 var table_data;
 var from_database = false;
 var table_result;
+var srcIPPortTcp;
+var dstIPPortTcp;
 
 
 $(document).ready(function () {
@@ -48,7 +50,10 @@ function initialise() {
     $(table_result).on( "click","tr", function (e) {
 
         let str1 = $(this).find("td:eq(1)").text();
+        srcIPPortTcp = str1; /*to display the ip in the table after the row is cicked */
+        dstIPPortTcp = $(this).find("td:eq(2)").text(); /*to display the ip in the table after the row is cicked */
         str1 += "_" + $(this).find("td:eq(2)").text();
+        
         table_result.removeClass('green lighten-2');
         $(this).addClass('green lighten-2');
         ws_command.send("getJson&" + str1);
@@ -132,8 +137,8 @@ function display_analysis_data(obj) { //for icmp analysis
 
     var j = 0;
     for (i = 0; i < two_way_table_data.length; i++) {
-        if ((two_way_table_data[i].folders_FL instanceof Array) && (two_way_table_data[i].folders_RL instanceof Array)) {
-            g_data_pair_only[j] = two_way_table_data[i];
+        if ((two_way_table_data[i].files_FL instanceof Array) && (two_way_table_data[i].files_RL instanceof Array)) {
+            g_data_tcp_pairs[j] = two_way_table_data[i];
             j++;
         }
     }
@@ -166,7 +171,7 @@ function initialise_stream_display() {
     //$('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
 }
 
-function display_stream_data(start, limit) { //display of main data contents in the table
+function display_stream_data() { //display of main data contents in the table
     table_result.empty();
 
     if (table_data == undefined || !(table_data instanceof Array)) return;
@@ -416,32 +421,52 @@ function load_table_result_prev() {
 }
 
 function load_two_way_tcp() {
-    start = 0;
+   // start = 0;
     two_way_only = true;
     if (g_data_tcp_pairs.length < 0) {
         console.log("none");
     }
-    max_size = g_data_tcp_pairs.length;
-    limit = Math.min(max_size, limit);
+    //max_size = g_data_tcp_pairs.length;
+   // limit = Math.min(max_size, limit);
     //display_stream_data(start, limit);
-    funct_to_load_two_way_pairs(start, limit);
+    funct_to_load_two_way_pairs();
     //$('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
 }
 
-function funct_to_load_two_way_pairs(start, limit) // function to load two way data called by load_2_way_streams() function
+function funct_to_load_two_way_pairs() // function to load two way data called by load_2_way_streams() function
 {
     table_result.empty();
     if (g_data_tcp_pairs == undefined || !(g_data_tcp_pairs instanceof Array)) return;
 
-    for (i = start; i < limit; ++i) {
+    for (i = 0; i < g_data_tcp_pairs.length ; ++i) {
         var stream = g_data_tcp_pairs[i];
 
         var str = '<tr>';
         str += '<td>' + (i + 1) + '</td>';
         str += '<td>' + stream.srcIP + '</td>';
         str += '<td>' + stream.dstIP + '</td>';
-        str += '<td>' + stream.file_fl + '</td>';
-        str += '<td>' + stream.file_rl + '</td>';
+        str += '<td>' + stream.src_dst + '</td>';
+        str += '<td>' + stream.dst_src + '</td>';
+        str += '<td>';
+        if(stream.files_FL instanceof Array)
+        {
+            for(let j = 0 ; j < stream.files_FL.length ; j++)
+            {
+                str += stream.files_FL[j] + "<br>";
+            }
+        }
+        str += '</td>';
+
+        str += '<td>';
+        if(stream.files_RL instanceof Array)
+        {
+            for(let j = 0 ; j < stream.files_RL.length ; j++)
+            {
+                str += stream.files_RL[j] + "<br>";
+            }
+        }
+        str += '</td>';
+        
         str += '</tr>';
         table_result.append(str);
     }
@@ -456,41 +481,45 @@ function load_all_tcp_streams() {
    // $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
 }
 
-function get_ip_json_data()
-{
-    var selected = {};
-    selected.ipData = [];
-    // let rows = $('#table_result_tcp tbody').find('tr');
-    // for(i = 0 ; i < rows.length ; ++i)
-    // {
-    //     selected.push(rows[i].children[0].)
-    // }
+// function get_ip_json_data()
+// {
+//     var selected = {};
+//     selected.ipData = [];
+//     // let rows = $('#table_result_tcp tbody').find('tr');
+//     // for(i = 0 ; i < rows.length ; ++i)
+//     // {
+//     //     selected.push(rows[i].children[0].)
+//     // }
 
-    //     var table = $("#table_result_tcp tbody");
-    // var value_check = "";
-    // for (var i = 1; i < table.rows.length; i++) {
-    //     if ($('#tcpIP')[i].is(':checked')) {
-    //         value_check += i + ": " + $('#tcpIP')[i].val();
-    //     }
-    // }
+//     //     var table = $("#table_result_tcp tbody");
+//     // var value_check = "";
+//     // for (var i = 1; i < table.rows.length; i++) {
+//     //     if ($('#tcpIP')[i].is(':checked')) {
+//     //         value_check += i + ": " + $('#tcpIP')[i].val();
+//     //     }
+//     // }
 
-    $('#table_result_tcp tbody tr').each(function (index) { // loop to insert the values that has been checked in the fl folder table
-        if ( $(this).find("input[type=checkbox]").prop('checked')) {
-            {
-                let string = $(this).find("td:eq(2)").text();
-                string += "_" + $(this).find("td:eq(3)").text()
-                selected.ipData.push(string);
-            }
-        }
-    });
+//     $('#table_result_tcp tbody tr').each(function (index) { // loop to insert the values that has been checked in the fl folder table
+//         if ( $(this).find("input[type=checkbox]").prop('checked')) {
+//             {
+//                 let string = $(this).find("td:eq(2)").text();
+//                 string += "_" + $(this).find("td:eq(3)").text()
+//                 selected.ipData.push(string);
+//             }
+//         }
+//     });
 
-    let str = JSON.stringify(selected);
-    ws_command.send("getJson&" + str);
-}
+//     let str = JSON.stringify(selected);
+//     ws_command.send("getJson&" + str);
+// }
 
 
 function display_json_data_after_click_row(parsedJsonData)
 {
+    $('#srcIPPortTcp').empty();
+    $('#dstIPPortTcp').empty();
+    $('#srcIPPortTcp').html(srcIPPortTcp);
+    $('#dstIPPortTcp').html(dstIPPortTcp);
     $('#json_result_clicked tbody').empty();
     for(let i = 0 ; i < parsedJsonData.length ; i++)
     {
@@ -498,22 +527,12 @@ function display_json_data_after_click_row(parsedJsonData)
 
         var str = '<tr>';
         str += '<td>' + checkTimeStamp(json_.layers["frame.time"]) + '</td>';
-        //str += '<td>' + json_.layers["frame.time"] + '</td>';
         str += '<td>' + json_.layers["tcp.seq"] + '</td>';
         str += '<td>' + json_.layers["tcp.ack"] + '</td>';
         str += '<td>' + json_.layers["tcp.len"] + '</td>';
         str += '<td>' + json_.layers["tcp.srcport"] + '</td>';
         str += '<td>' + json_.layers["tcp.dstport"] + '</td>';
         str += '<td>' + checkFlags(json_.layers["tcp.flags"]) + '</td>';
-        // if(json_.layers["tcp.flags"] == "0x00000018")
-        // {
-        //     str += '<td>' + "PSH-ACK" + '</td>';
-        // }
-        // else
-        // {
-        //     str += '<td>' + json_.layers["tcp.flags"] + '</td>';
-        // }
-        
         str += '</tr>';
         $('#json_result_clicked').append(str);
     }
@@ -521,24 +540,7 @@ function display_json_data_after_click_row(parsedJsonData)
 
 function checkFlags(flag)
 {
-//     var s;
 
-//    switch(flag)
-//     {
-
-//         case "0x00000018":
-//          s = "PSH-ACK";
-         
-//            break;
-
-//         case "0x00000010":
-//         s = "jo";
-//         break;
-
-
-
-           
-//     }
     if(flag == "0x00000018")
     {
         return "PSH-ACK";
