@@ -30,12 +30,13 @@
     <ClCompile Include="..\code\source\Analyzer.cpp" />
     <ClCompile Include="..\code\source\Check_internet.cpp" />
     <ClCompile Include="..\code\source\Configuration.cpp" />
-    <ClCompile Include="..\code\source\Database_writer.cpp" />
     <ClCompile Include="..\code\source\Dns_Analyzer.cpp" />
     <ClCompile Include="..\code\source\Dns_ip_stream.cpp" />
+    <ClCompile Include="..\code\source\Dns_Stream_Writer.cpp" />
+    <ClCompile Include="..\code\source\GetDnsJsonDetailsGui.cpp" />
+    <ClCompile Include="..\code\source\GetTcpJsonDetailsGui.cpp" />
     <ClCompile Include="..\code\source\Icmp_Analyzer.cpp" />
     <ClCompile Include="..\code\source\Icmp_stream.cpp" />
-    <ClCompile Include="..\code\source\IgnorePrivateIp.cpp" />
     <ClCompile Include="..\code\source\Ip_Address_to_country_mapper.cpp" />
     <ClCompile Include="..\code\source\Ip_stream.cpp" />
     <ClCompile Include="..\code\source\main.cpp" />
@@ -45,18 +46,20 @@
     <ClCompile Include="..\code\source\Streamer.cpp" />
     <ClCompile Include="..\code\source\Tcp_Analyzer.cpp" />
     <ClCompile Include="..\code\source\Tcp_stream.cpp" />
+    <ClCompile Include="..\code\source\Tcp_Stream_Writer.cpp" />
     <ClCompile Include="..\code\source\WebServer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\code\include\Analyzer.h" />
     <ClInclude Include="..\code\include\Check_internet.h" />
     <ClInclude Include="..\code\include\Configuration.h" />
-    <ClInclude Include="..\code\include\Database_writer.h" />
     <ClInclude Include="..\code\include\Dns_Analyzer.h" />
     <ClInclude Include="..\code\include\Dns_ip_stream.h" />
+    <ClInclude Include="..\code\include\Dns_Stream_Writer.h" />
+    <ClInclude Include="..\code\include\GetDnsJsonDetailsGui.h" />
+    <ClInclude Include="..\code\include\GetTcpJsonDetailsGui.h" />
     <ClInclude Include="..\code\include\Icmp_Analyzer.h" />
     <ClInclude Include="..\code\include\Icmp_stream.h" />
-    <ClInclude Include="..\code\include\IgnorePrivateIp.h" />
     <ClInclude Include="..\code\include\Ip_Address_to_country_mapper.h" />
     <ClInclude Include="..\code\include\Ip_stream.h" />
     <ClInclude Include="..\code\include\Protocol_analyzer.h" />
@@ -66,6 +69,7 @@
     <ClInclude Include="..\code\include\targetver.h" />
     <ClInclude Include="..\code\include\Tcp_Analyzer.h" />
     <ClInclude Include="..\code\include\Tcp_stream.h" />
+    <ClInclude Include="..\code\include\Tcp_Stream_Writer.h" />
     <ClInclude Include="..\code\include\WebServer.h" />
   </ItemGroup>
   <ItemGroup>
