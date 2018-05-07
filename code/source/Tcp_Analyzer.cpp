@@ -269,7 +269,6 @@ int Tcp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 					case 0: /*means src to destination*/
 						found = true;
 						tcp_streams_vector.at(i).increment_tcp_src_dst();
-						//tcp_streams_vector.at(i).update(src_dst_port_str, se_no, ack_no);
 						if (is_fl)
 						{
 							tcp_streams_vector.at(i).add_folder_FL(folder);
@@ -286,7 +285,6 @@ int Tcp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 					case 1: /*means destination to source*/
 						found = true;
 						tcp_streams_vector.at(i).increment_tcp_dst_src();
-						//tcp_streams_vector.at(i).update(src_dst_port_str, se_no, ack_no);
 						if (is_fl)
 						{
 							tcp_streams_vector.at(i).add_folder_FL(folder);
@@ -309,7 +307,6 @@ int Tcp_Analyzer::process(std::pair<std::string, std::string> item, bool is_fl)
 				if(!found)
 				{
 					new_tcp_streams.increment_tcp_src_dst();				
-					//new_tcp_streams.update(src_dst_port_str, se_no, ack_no);
 					
 					if (is_fl)
 					{

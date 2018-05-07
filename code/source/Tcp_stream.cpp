@@ -127,9 +127,9 @@ int Tcp_stream::tcp_equals(const Tcp_stream& that) const
 
 std::pair<std::string, std::string> Tcp_stream::split_string(std::string str) //function to split string and return two values as pair
 {
-	std::size_t found = str.find_first_of(":"); //separating src and dst port
-	std::string str1 = str.substr(0, found); // converting src port from string to uint32_t
-	std::string str2 = str.substr(found + 1); // converting src port from string to uint32_t
+	std::size_t found = str.find_first_of(":");			//separating src and dst port
+	std::string str1 = str.substr(0, found);			// converting src port from string to uint32_t
+	std::string str2 = str.substr(found + 1);			// converting src port from string to uint32_t
 	return std::make_pair(str1, str2);
 }
 

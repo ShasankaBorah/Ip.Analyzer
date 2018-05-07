@@ -45,9 +45,9 @@
                     <div class="row">
 
                         <button class="btn col s1" id="btn_start_tcp_analysis" onclick="start_tcp_analysis()">TCP Analysis</button>
-                        <button class="btn col s1" id="btn_load_two_way_tcp" onclick="load_two_way_tcp()">Load Two Way</button>
+                        <!-- <button class="btn col s1" id="btn_load_two_way_tcp" onclick="load_two_way_tcp()">Load Two Way</button> -->
                         <button class="btn col s1" onclick="load_all_tcp_streams()">Reset</button>
-                        <button class="btn col s1" onclick="get_ip_json_data()">Get Json</button>
+                        <!-- <button class="btn col s1" onclick="get_ip_json_data()">Get Json</button> -->
                         <div class="input-field col s3">
                             <select id="select_db_list"></select>
                             <label>Available Databases</label>
@@ -105,7 +105,7 @@
 
 
             <div class="row">
-                <div class="col s6" style="overflow-y: scroll; height:500px">
+                <div class="col s4" style="overflow-y: scroll; height:500px">
                     <table id="table_result_tcp" class="tablesorter-default">
                         <thead>
                             <tr>
@@ -124,16 +124,16 @@
                 </div>
 
 
-                <div class="col s6" style="overflow-y: scroll; height:500px">
+                <div class="col s8" style="overflow-y: scroll; height:500px">
 
                     <div class="row">
                         <div class="col s6">
-                            <div>Source IP Address:
+                            <div>Source :
                                 <span id="srcIPPortTcp" />
                             </div>
                         </div>
                         <div class="col s6">
-                            <div>Destination IP Address:
+                            <div>Destination :
                                 <span id="dstIPPortTcp" />
                             </div>
                         </div>
@@ -156,40 +156,6 @@
                     </table>
 
                 </div>
-
-                <!-- <div id="result"> </div>
-                <div class="col s6">
-                    <div class="row">
-                        <div class="col s6">
-                            <div>Source IP Address:
-                                <span id="p_seq_src" />
-                            </div>
-                        </div>
-
-                        <div class="col s6">
-                            <div>Destination IP Address:
-                                <span id="p_seq_dst" />
-                            </div>
-                        </div>
-                    </div> -->
-
-                <!-- <div class="row">
-                        <div class="col s12">
-                            <table id="table_sequence" class="bordered highlight">
-                                <thead>
-                                    <tr>
-                                        <th>Src Port</th>
-                                        <th>Dst Port</th>
-                                        <th>Total Se.</th>
-                                        <th>Sequence No.</th>
-                                        <th>Total Ack.</th>
-                                        <th>Ack. No.</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div> -->
             </div>
         </div>
     </div>

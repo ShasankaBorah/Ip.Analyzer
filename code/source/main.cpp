@@ -7,6 +7,8 @@
 #include "Ip_Address_to_country_mapper.h"
 #include "Tcp_Stream_Writer.h"
 #include "GetTcpJsonDetailsGui.h"
+#include "Dns_Stream_Writer.h"
+#include "GetDnsJsonDetailsGui.h"
 #include <iostream>
 #include <conio.h>
 #include <string>
@@ -31,7 +33,9 @@ namespace pt = boost::posix_time;
 namespace ptree = boost::property_tree;
 using jsonnlohmann = nlohmann::json;
 
+Dns_Stream_Writer dns_stream_writer;
 GetTcpJsonDetailsGui getTcpJsonDetailsGui;
+GetDnsJsonDetailsGui getDnsJsonDetailsGui;
 WebServer server_instance;
 Configuration config;
 pcapPackAnalyzer filesToAnalyze;
@@ -79,6 +83,14 @@ void callback(const std::string& uri, const std::string& str)
 			std::string result = getTcpJsonDetailsGui.jsonToSendToGui();
 			server_instance.send_data("/ws/command", result);
 
+		}
+		else if(tokens.at(0).compare("getDnsJson") == 0)
+		{
+			std::string str = tokens.at(1);
+			getDnsJsonDetailsGui.getJsonData(str);
+			std::string result = getDnsJsonDetailsGui.jsonToSendToGui();
+			server_instance.send_data("/ws/command", result);
+		
 		}
 		else if (tokens.at(0).compare("get_configuration") == 0)
 		{
@@ -283,6 +295,10 @@ void callback(const std::string& uri, const std::string& str)
 		{
 			dns_analyze.initialize();
 			dns_analyze.start_analysis();
+
+			dns_stream_writer.initialize();
+			dns_stream_writer.start_write_analysis();
+
 			std::string result = dns_analyze.printToJson();
 			server_instance.send_data("/ws/command", result);		
 		}

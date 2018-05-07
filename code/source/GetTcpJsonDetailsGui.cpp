@@ -94,8 +94,6 @@ void GetTcpJsonDetailsGui::writePcapDataToJson(std::string file_name)
 		std::string tsharkStartString = "\"C:\\Program Files\\Wireshark\\tshark.exe\" -r tcpAnalysisData\\tcpBin\\";
 		std::string tsharkFilterString = ".pcap -t d -Tjson -e frame.time -e tcp.seq -e tcp.ack -e tcp.len -e tcp.srcport -e tcp.dstport -e tcp.flags > ";
 
-		//std::size_t found = it->first.find_last_of("."); //separating src and dst port
-		//std::string str = it->first.substr(0, found);
 		std::string jsonFileName = "tcpAnalysisData\\tcpJson\\" + file_name + ".json";
 
 		std::string tsharkCommandString = tsharkStartString + file_name +  tsharkFilterString + jsonFileName;

@@ -47,18 +47,18 @@ function initialise() {
 
     table_result = $('#table_result_tcp tbody');
 
-    $(table_result).on( "click","tr", function (e) {
+    $(table_result).on("click", "tr", function (e) {
 
         let str1 = $(this).find("td:eq(1)").text();
         srcIPPortTcp = str1; /*to display the ip in the table after the row is cicked */
         dstIPPortTcp = $(this).find("td:eq(2)").text(); /*to display the ip in the table after the row is cicked */
         str1 += "_" + $(this).find("td:eq(2)").text();
-        
+
         table_result.removeClass('green lighten-2');
         $(this).addClass('green lighten-2');
         ws_command.send("getJson&" + str1);
 
-       
+
     });
 
     $('#top_nav').load("top_nav.html", function () {
@@ -111,8 +111,7 @@ function parse_command_reply(data) {
         display_tcp_database(obj);
         $('#btn_get_tcp_database_all').removeClass('disabled');
     }
-    else if(obj.type == "ipJsonResult")
-    {
+    else if (obj.type == "ipJsonResult") {
         var parsedJsonData = JSON.parse(obj.tcp_pcaket_info);
         console.log("ip json received");
         display_json_data_after_click_row(parsedJsonData);
@@ -187,20 +186,16 @@ function display_stream_data() { //display of main data contents in the table
         str += '<td>' + stream.src_dst + '</td>';
         str += '<td>' + stream.dst_src + '</td>';
         str += '<td>';
-        if(stream.files_FL instanceof Array)
-        {
-            for(let j = 0 ; j < stream.files_FL.length ; j++)
-            {
+        if (stream.files_FL instanceof Array) {
+            for (let j = 0; j < stream.files_FL.length; j++) {
                 str += stream.files_FL[j] + "<br>";
             }
         }
         str += '</td>';
 
         str += '<td>';
-        if(stream.files_RL instanceof Array)
-        {
-            for(let j = 0 ; j < stream.files_RL.length ; j++)
-            {
+        if (stream.files_RL instanceof Array) {
+            for (let j = 0; j < stream.files_RL.length; j++) {
                 str += stream.files_RL[j] + "<br>";
             }
         }
@@ -367,14 +362,14 @@ function load_table_result_next() {
             limit = Math.min(g_data_pair_only.length, limit);
             table_result.empty();
             funct_to_load_two_way_pairs(next_pairs, limit);
-           // $('#p_table_result_info').html((next_pairs + 1) + '-' + limit + '(' + max_size + ')');
+            // $('#p_table_result_info').html((next_pairs + 1) + '-' + limit + '(' + max_size + ')');
         }
     } else if (max_size > next) {
         limit = limit + rows_per_page;
         limit = Math.min(table_data.length, limit);
         table_result.empty();
         display_stream_data(next, limit);
-       // $('#p_table_result_info').html((next + 1) + '-' + limit + '(' + max_size + ')');
+        // $('#p_table_result_info').html((next + 1) + '-' + limit + '(' + max_size + ')');
     }
 }
 
@@ -416,61 +411,61 @@ function load_table_result_prev() {
         }
         table_result.empty();
         display_stream_data(prev, limit);
-       // $('#p_table_result_info').html((prev + 1) + '-' + limit + '(' + max_size + ')');
+        // $('#p_table_result_info').html((prev + 1) + '-' + limit + '(' + max_size + ')');
     }
 }
 
-function load_two_way_tcp() {
-   // start = 0;
-    two_way_only = true;
-    if (g_data_tcp_pairs.length < 0) {
-        console.log("none");
-    }
-    //max_size = g_data_tcp_pairs.length;
-   // limit = Math.min(max_size, limit);
-    //display_stream_data(start, limit);
-    funct_to_load_two_way_pairs();
-    //$('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
-}
+// function load_two_way_tcp() {
+//    // start = 0;
+//     two_way_only = true;
+//     if (g_data_tcp_pairs.length < 0) {
+//         console.log("none");
+//     }
+//     //max_size = g_data_tcp_pairs.length;
+//    // limit = Math.min(max_size, limit);
+//     //display_stream_data(start, limit);
+//     funct_to_load_two_way_pairs();
+//     //$('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
+// }
 
-function funct_to_load_two_way_pairs() // function to load two way data called by load_2_way_streams() function
-{
-    table_result.empty();
-    if (g_data_tcp_pairs == undefined || !(g_data_tcp_pairs instanceof Array)) return;
+// function funct_to_load_two_way_pairs() // function to load two way data called by load_2_way_streams() function
+// {
+//     table_result.empty();
+//     if (g_data_tcp_pairs == undefined || !(g_data_tcp_pairs instanceof Array)) return;
 
-    for (i = 0; i < g_data_tcp_pairs.length ; ++i) {
-        var stream = g_data_tcp_pairs[i];
+//     for (i = 0; i < g_data_tcp_pairs.length ; ++i) {
+//         var stream = g_data_tcp_pairs[i];
 
-        var str = '<tr>';
-        str += '<td>' + (i + 1) + '</td>';
-        str += '<td>' + stream.srcIP + '</td>';
-        str += '<td>' + stream.dstIP + '</td>';
-        str += '<td>' + stream.src_dst + '</td>';
-        str += '<td>' + stream.dst_src + '</td>';
-        str += '<td>';
-        if(stream.files_FL instanceof Array)
-        {
-            for(let j = 0 ; j < stream.files_FL.length ; j++)
-            {
-                str += stream.files_FL[j] + "<br>";
-            }
-        }
-        str += '</td>';
+//         var str = '<tr>';
+//         str += '<td>' + (i + 1) + '</td>';
+//         str += '<td>' + stream.srcIP + '</td>';
+//         str += '<td>' + stream.dstIP + '</td>';
+//         str += '<td>' + stream.src_dst + '</td>';
+//         str += '<td>' + stream.dst_src + '</td>';
+//         str += '<td>';
+//         if(stream.files_FL instanceof Array)
+//         {
+//             for(let j = 0 ; j < stream.files_FL.length ; j++)
+//             {
+//                 str += stream.files_FL[j] + "<br>";
+//             }
+//         }
+//         str += '</td>';
 
-        str += '<td>';
-        if(stream.files_RL instanceof Array)
-        {
-            for(let j = 0 ; j < stream.files_RL.length ; j++)
-            {
-                str += stream.files_RL[j] + "<br>";
-            }
-        }
-        str += '</td>';
-        
-        str += '</tr>';
-        table_result.append(str);
-    }
-}
+//         str += '<td>';
+//         if(stream.files_RL instanceof Array)
+//         {
+//             for(let j = 0 ; j < stream.files_RL.length ; j++)
+//             {
+//                 str += stream.files_RL[j] + "<br>";
+//             }
+//         }
+//         str += '</td>';
+
+//         str += '</tr>';
+//         table_result.append(str);
+//     }
+// }
 
 function load_all_tcp_streams() {
     start = 0;
@@ -478,7 +473,7 @@ function load_all_tcp_streams() {
     two_way_only = false;
     max_size = table_data.length;
     display_stream_data(start, limit);
-   // $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
+    // $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
 }
 
 // function get_ip_json_data()
@@ -514,16 +509,40 @@ function load_all_tcp_streams() {
 // }
 
 
-function display_json_data_after_click_row(parsedJsonData)
-{
+function display_json_data_after_click_row(parsedJsonData) {
+    // var src_port;
+    // var dst_port;
+    // var src_port_new;
+    // var dst_port_new;
+
+    let srcPortPos = srcIPPortTcp.indexOf(':');
+
+    let dstPortPos = dstIPPortTcp.indexOf(':');
+
+    var srcPort = srcIPPortTcp.substring(srcPortPos + 1);
+    var dstPort = dstIPPortTcp.substring(dstPortPos + 1);
+
     $('#srcIPPortTcp').empty();
     $('#dstIPPortTcp').empty();
     $('#srcIPPortTcp').html(srcIPPortTcp);
     $('#dstIPPortTcp').html(dstIPPortTcp);
     $('#json_result_clicked tbody').empty();
-    for(let i = 0 ; i < parsedJsonData.length ; i++)
-    {
+
+    for (let i = 0; i < parsedJsonData.length; i++) {
         var json_ = parsedJsonData[i]._source;
+
+        let flagValue = hexToFlagValues(json_.layers["tcp.flags"]);//hex to 
+
+        // let flagCheck = true;
+
+        // if(i < 3)
+        // {
+        //     if(!(flagCheck == checkFlagValue(i, flagValue)))          
+        //     {
+        //         Materialize.toast("No Handshake");
+        //     }
+        // }
+        
 
         var str = '<tr>';
         str += '<td>' + checkTimeStamp(json_.layers["frame.time"]) + '</td>';
@@ -532,57 +551,76 @@ function display_json_data_after_click_row(parsedJsonData)
         str += '<td>' + json_.layers["tcp.len"] + '</td>';
         str += '<td>' + json_.layers["tcp.srcport"] + '</td>';
         str += '<td>' + json_.layers["tcp.dstport"] + '</td>';
-        str += '<td>' + checkFlags(json_.layers["tcp.flags"]) + '</td>';
+        str += '<td>' + flagValue + '</td>';
         str += '</tr>';
         $('#json_result_clicked').append(str);
     }
 }
 
-function checkFlags(flag)
+function hexToFlagValues(flag) //function used to convert the hex value of flag to human readable format
 {
 
-    if(flag == "0x00000018")
-    {
+    if (flag == "0x00000018") {
         return "PSH-ACK";
     }
-    else if(flag == "0x00000010")
-    {
+    else if (flag == "0x00000010") {
         return "ACK";
     }
-    else if(flag == "0x00000002")
-    {
+    else if (flag == "0x00000002") {
         return "SYN";
     }
-    else if(flag == "0x00000001")
-    {
-        return "FIN";    
+    else if (flag == "0x00000001") {
+        return "FIN";
     }
-    else if(flag == "0x00000009")
-    {
+    else if (flag == "0x00000009") {
         return "FIN-PSH";
     }
-    else if(flag == "0x00000011")
-    {
+    else if (flag == "0x00000011") {
         return "FIN-ACK";
     }
-    else if(flag == "0x00000012")
-    {
+    else if (flag == "0x00000012") {
         return "SYN-ACK";
     }
-    else if(flag == "0x00000008")
-    {
+    else if (flag == "0x00000008") {
         return "PSH";
     }
-    else if(flag == "0x00000014")
-    {
+    else if (flag == "0x00000014") {
         return "RST-ACK";
     }
 
 }
 
-function checkTimeStamp(timestamp)
-{
-    var myStr = timestamp[0].slice(13,26);
+function checkTimeStamp(timestamp) {
+    var myStr = timestamp[0].slice(13, 26);
     return myStr;
-    //console.log(myStr);
 }
+
+// function checkFlagValue(i, flagValue) //function used to check the flag value i.e if its ACK or SYN etc..
+// {
+//     if (i == 0) 
+//     {
+//         if (flag.localeCompare("SYN") == 0) 
+//         {
+//             //console.log("same");
+//             return true;
+//         }
+//     }
+//     else if(i == 1)
+//     {
+//         if (flag.localeCompare("SYN-ACK") == 0) 
+//         {
+//             //console.log("same");
+//             return true;
+//         }
+//     }
+//     else if(i == 2)
+//     {
+//         if (flag.localeCompare("ACK") == 0) 
+//         {
+//             //console.log("same");
+//             return true;
+//         }
+//     }
+
+
+// }
