@@ -50,6 +50,8 @@
             <button class="btn col s1" id="btn_load_two_way" onclick="load_2_way_streams()">Load Two way Data</button>
             <button class="btn col s1" id="btn_reset" onclick="load_all_streams()">Reset</button>
             <button class="btn col s1" id="btn_save_pairs_info_to_file" onclick="save_pairs_info_to_file()">Export Pairs</button>
+            <button class="btn col s1" id="btn_save_table_csv" onclick="save_table_csv()" >Export Csv</button>
+
             <div class="input-field col s3">
               <select id="select_db_list"></select>
               <label>Available Databases</label>
@@ -58,7 +60,7 @@
             <h6 class="col s1">Number of Files Read :
               <span id="d_num_files"></span>
             </h6>
-            
+
             <div class="col s2">
               <form>
                 <p>
@@ -67,7 +69,14 @@
                 </p>
               </form>
             </div>
-
+            <div class="col s1">
+              <form>
+                <p>
+                  <input class="with-gap" name="evolution_scpc" type="checkbox" id="evolution_scpc" />
+                  <label for="evolution_scpc">Evolution SCPC</label>
+                </p>
+              </form>
+            </div>
 
           </div>
 

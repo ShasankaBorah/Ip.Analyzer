@@ -33,6 +33,8 @@
     <ClCompile Include="..\code\source\Dns_Analyzer.cpp" />
     <ClCompile Include="..\code\source\Dns_ip_stream.cpp" />
     <ClCompile Include="..\code\source\Dns_Stream_Writer.cpp" />
+    <ClCompile Include="..\code\source\Evolution_SCPC.cpp" />
+    <ClCompile Include="..\code\source\Evolution_SCPC_stream.cpp" />
     <ClCompile Include="..\code\source\GetDnsJsonDetailsGui.cpp" />
     <ClCompile Include="..\code\source\GetTcpJsonDetailsGui.cpp" />
     <ClCompile Include="..\code\source\Icmp_Analyzer.cpp" />
@@ -56,6 +58,8 @@
     <ClInclude Include="..\code\include\Dns_Analyzer.h" />
     <ClInclude Include="..\code\include\Dns_ip_stream.h" />
     <ClInclude Include="..\code\include\Dns_Stream_Writer.h" />
+    <ClInclude Include="..\code\include\Evolution_SCPC.h" />
+    <ClInclude Include="..\code\include\Evolution_SCPC_stream.h" />
     <ClInclude Include="..\code\include\GetDnsJsonDetailsGui.h" />
     <ClInclude Include="..\code\include\GetTcpJsonDetailsGui.h" />
     <ClInclude Include="..\code\include\Icmp_Analyzer.h" />

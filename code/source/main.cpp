@@ -9,6 +9,7 @@
 #include "GetTcpJsonDetailsGui.h"
 #include "Dns_Stream_Writer.h"
 #include "GetDnsJsonDetailsGui.h"
+#include "Evolution_SCPC.h"
 #include <iostream>
 #include <conio.h>
 #include <string>
@@ -45,6 +46,7 @@ Tcp_Stream_Writer tcp_stream_writer;
 Dns_Analyzer dns_analyze;
 Protocol_analyzer protocol_analyze;
 Ip_Address_to_country_mapper ip_address_resolve;
+Evolution_SCPC evolution_scpc;
 
 //ip_addr.get_country(ip);
 
@@ -98,7 +100,7 @@ void callback(const std::string& uri, const std::string& str)
 			// get jsonnlohmann format of the config and send it
 			server_instance.send_data("/ws/command", config.getJSON());
 		}
-		else if(tokens.at(0).compare("start_analysis") == 0)
+		/*else if(tokens.at(0).compare("start_analysis") == 0)
 		{
 			bool check = false;
 			if(tokens.at(1).compare("true") == 0)
@@ -110,7 +112,7 @@ void callback(const std::string& uri, const std::string& str)
 			filesToAnalyze.start_analysis();
 			std::string result = filesToAnalyze.printToJSON();
 			server_instance.send_data("/ws/command", result);
-		}
+		}*/
 		else if(tokens.at(0).compare("start_icmp_analysis") == 0)
 		{
 			bool check = false;
@@ -211,6 +213,34 @@ void callback(const std::string& uri, const std::string& str)
 		{
 			std::string folders = load_pcap_folder_list(tokens.at(1),tokens.at(2));			
 			server_instance.send_data("/ws/command", folders);
+		}
+		else if(tokens.at(0).compare("start_analysis") == 0)
+		{
+			if(tokens.at(2) == "false")
+			{
+				bool check = false;
+				if (tokens.at(1).compare("true") == 0)
+				{
+					check = true;
+				}
+
+				filesToAnalyze.initialize(check);
+				filesToAnalyze.start_analysis();
+				std::string result = filesToAnalyze.printToJSON();
+				server_instance.send_data("/ws/command", result);
+			}
+			else if(tokens.at(2) == "true")
+			{
+				bool check = false;
+				if (tokens.at(1).compare("true") == 0)
+				{
+					check = true;
+				}
+				evolution_scpc.initialize(check);
+				evolution_scpc.start_evolutionSCPC_analysis();
+				std::string result = evolution_scpc.printToJSON();
+				server_instance.send_data("/ws/command", result);
+			}		
 		}
 	}
 

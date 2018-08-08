@@ -153,6 +153,13 @@ function load_selected_db() {
 
 function display_analysis_data(obj) { //for icmp analysis
     g_data = obj;
+
+    if(obj.streams == undefined)
+    {
+        stream_data_file_result_body(obj);
+        Materialize.toast("No DNS Data");
+        return;
+    }
     two_way_table_data = obj.streams;
 
     var j = 0;
@@ -520,8 +527,28 @@ function display_json_data_after_click_row(parsedJsonData) {
         var str = '<tr>';
         str += '<td>' + (i + 1) + '</td>';
         str += '<td>' + json_.layers["dns.id"] + '</td>';
-        str += '<td>' + json_.layers["dns.qry.name"] + '</td>';
-        str += '<td>' + json_.layers["dns.resp.name"] + '</td>';
+        if(json_.layers["dns.qry.name"] instanceof Array)
+        {
+            str += '<td>'
+            for(let i = 0 ; i < json_.layers["dns.qry.name"].length ; ++i )
+            {
+                str += json_.layers["dns.qry.name"][i] + '<br>';
+            }
+            str += '</td>'
+        }
+
+
+        if(json_.layers["dns.resp.name"] instanceof Array)
+        {
+            str += '<td>'
+            for(let i = 0 ; i < json_.layers["dns.resp.name"].length ; ++i )
+            {
+                str += json_.layers["dns.resp.name"][i] + '<br>';
+            }
+            str += '</td>'
+        }
+        //str += '<td>' + json_.layers["dns.qry.name"] + '</td>';
+        //str += '<td>' + json_.layers["dns.resp.name"] + '</td>';
         str += '</tr>';
         $('#table_sequence').append(str);
 

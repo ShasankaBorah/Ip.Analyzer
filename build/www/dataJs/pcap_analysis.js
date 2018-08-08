@@ -4,6 +4,7 @@ var ws_messages;
 var two_way_only = false;
 var g_data;
 var g_data_pcap_pairs = [];
+var g_data_pcap_evolution_scpc_pairs = [];
 var table_result;
 //var two_way_table_data;
 let next; //used to scroll to next page
@@ -11,6 +12,7 @@ var max_size;
 let next_pairs;
 var start;
 let prev;
+var global_result_object;
 var rows_per_page = 100;
 var limit = rows_per_page;
 var table_data;
@@ -23,6 +25,7 @@ var multicast = /^(2(2[4-9]|3[0-9]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-
 
 var countryMap = {}; //to store country name with count of packets from that country
 var excludePrivateIp = false;
+var evolution_scpc = false;
 
 
 $(document).ready(function () {
@@ -49,8 +52,7 @@ function initialise() {
 
   ws_message = new WebSocket("ws://" + host + "/ws/message");
   ws_message.onmessage = function (evt) {
-    if(evt.data == "pair file saved")
-    {
+    if (evt.data == "pair file saved") {
       $('#btn_save_pairs_info_to_file').removeClass('disabled');
     }
     Materialize.toast(evt.data, 1000);
@@ -75,6 +77,12 @@ function initialise() {
   });
   /******************************************************************************************************************************************/
 
+//   $("#btn_save_table_csv").click(function(){
+//     var table_result = $("#table_result");
+//     var html = table_result.querySelector("#file_result table").outerHTML;
+//      export_table_to_csv(html, "table.csv");
+// }); 
+
 }
 
 
@@ -90,10 +98,14 @@ function start_analysis() {
   if ($('#exclude_private_ip').get(0).checked) {
     excludePrivateIp = true;
   }
+  if ($('#evolution_scpc').get(0).checked) {
+    evolution_scpc = true;
+  }
+
   $('#btn_start_analysis').addClass('disabled');
   $('#table_result tbody').empty();
 
-  ws_command.send("start_analysis&" + excludePrivateIp);
+  ws_command.send("start_analysis&" + excludePrivateIp + "&" + evolution_scpc);
 }
 
 function load_selected_db() {
@@ -104,6 +116,7 @@ function load_selected_db() {
 
 function parse_command_reply(data) {
   var obj = JSON.parse(data);
+  
 
   if (obj.type == "result") {
     console.log("Analysis data received.");
@@ -119,6 +132,12 @@ function parse_command_reply(data) {
   } else if (obj.type == "pcap_database") {
     console.log("Full pcap database files received");
     display_pcap_database(obj);
+  }
+  else if (obj.type == "evolution_result") {
+    console.log("Evolution analysis result received");
+    display_analysis_data(obj);
+    $('#btn_start_analysis').removeClass('disabled');
+
   }
 }
 
@@ -148,12 +167,478 @@ function parse_message(data) {
 
 function display_analysis_data(obj) { //loads data after the analysis is done
   g_data = obj;
-  stream_data_file_result_body(obj);
-  stream_data_pair_result_body(obj);
-  stream_data_country_count(obj);
-  initialise_stream_display();
-  set_world_map();
+  if (evolution_scpc == true) {
+    stream_data_file_result_body_evolution_scpc(obj);
+    stream_data_pair_result_body_evolution_scpc(obj);
+    initialise_stream_display_evolution_scpc();
+  } else {
+    stream_data_file_result_body(obj);
+    stream_data_pair_result_body(obj);
+    stream_data_country_count(obj);
+    initialise_stream_display();
+    set_world_map();
+  }
+
 }
+
+/////////////////////////////////FOR EVOLUTION SCPC///////////////////////////////////////////////////
+function download_csv(csv, filename) {
+  var csvFile;
+  var downloadLink;
+
+  // CSV FILE
+  csvFile = new Blob([csv], {type: "text/csv"});
+
+  // Download link
+  downloadLink = document.createElement("a");
+
+  // File name
+  downloadLink.download = filename;
+
+  // We have to create a link to the file
+  downloadLink.href = window.URL.createObjectURL(csvFile);
+
+  // Make sure that the link is not displayed
+  downloadLink.style.display = "none";
+
+  // Add the link to your DOM
+  document.body.appendChild(downloadLink);
+
+  // Lanzamos
+  downloadLink.click();
+}
+
+function export_table_to_csv(html, filename) {
+
+}
+
+// $('btn_save_table_csv').click(function () {
+//   var html = document.querySelector("#file_result table").outerHTML;
+// export_table_to_csv(html, "table.csv");
+// });
+
+function save_table_csv(){
+  // var html = document.querySelector("#file_result table").outerHTML;
+  var csv = [];
+  var csv_filename = "table.csv";
+  
+// var rows = $("#table_result tr");
+// // document.querySelectorAll("table tr");
+
+//   for (var i = 0; i < rows.length; i++) {
+  // var row = [];
+  var row_1 = [];
+  row_1.push("No.");
+  
+  row_1.push("Source IP");
+  
+  row_1.push("Src Country");
+  
+  row_1.push("Destination IP");
+ 
+  row_1.push("Dst Country");
+  
+  row_1.push("Source - Destination");
+  
+  row_1.push("Destination - Source");
+
+  row_1.push("Source - Destination Protocols");
+  
+  row_1.push("Destination - Source Protocols");
+ 
+  row_1.push("FL Frequencies");
+ 
+  row_1.push("RL Frequencies");
+  csv.push(row_1.join(","));
+
+  for(key in table_data){
+    var row_test = []
+    row_test.push(key);
+    
+    row_test.push(table_data[key].SrcIp);
+   
+    row_test.push("NA");
+    
+    row_test.push(table_data[key].SrcIp);
+   
+    row_test.push("NA");
+    
+    if(table_data[key].AtoB instanceof Array){
+      
+      row_test.push(table_data[key].AtoB[0].Count);
+      
+    }else{
+      row_test.push("0");
+      
+    }
+
+     if(table_data[key].BtoA instanceof Array){
+      row_test.push(table_data[key].BtoA[0].Count);
+    
+    }else{
+      row_test.push("0");
+     
+    }
+
+    if(table_data[key].AtoB_protocol != undefined){
+
+    }else{
+      row_test.push("NA");
+      
+    }
+
+    if(table_data[key].BtoA_protocol != undefined){
+
+    }else{
+      row_test.push("NA");
+     
+    }
+
+    if(table_data[key].AtoB instanceof Array){
+      
+      row_test.push(table_data[key].AtoB[0].Freq_Folder);
+      
+    }else{
+      row_test.push("NA");
+     
+    }
+
+    if(table_data[key].BtoA instanceof Array){
+      
+      row_test.push(table_data[key].BtoA[0].Freq_Folder);
+    
+    }else{
+      row_test.push("NA");
+      
+    }
+
+    csv.push(row_test.join(","));
+}
+//   cols = rows[i].querySelectorAll("td, th");
+  
+//       for (var j = 0; j < cols.length; j++) 
+//           row.push(cols[j].innerText.trim());
+      
+//   csv.push(row.join(","));		
+// }
+
+  // Download CSV
+  download_csv(csv.join("\n"), csv_filename);
+}
+
+// document.getElementById("btn_save_table_csv").addEventListener("click", function(){
+//   document.getElementById("demo").innerHTML = "Hello World";
+// });
+
+// document.querySelector('#btn_save_table_csv').on("click", function () {
+//   var html = document.querySelector("#file_result table").outerHTML;
+// export_table_to_csv(html, "table.csv");
+// });
+
+
+
+function initialise_stream_display_evolution_scpc() {
+  if (g_data == undefined) return;
+
+  table_data = g_data.IPDetails;
+
+  if (from_database == true) {
+    limit = rows_per_page;
+  }
+  //two_way_table_data = g_data.IpDetails;
+
+  var j = 0;
+  for (i = 0; i < table_data.length; i++) {
+    if ((table_data[i].AtoB instanceof Array) && (table_data[i].BtoA instanceof Array)) {
+      g_data_pcap_evolution_scpc_pairs[j] = table_data[i];
+      j++;
+    }
+  }
+
+  max_size = table_data.length;
+  start = 0;
+
+  limit = Math.min(table_data.length, limit);
+
+  display_stream_data_evolution_scpc(start, limit);
+  $('#p_table_result_info').html(1 + '-' + (limit) + '(' + max_size + ')');
+}
+
+
+function display_stream_data_evolution_scpc(start, limit) {
+  table_result.empty();
+
+  if (table_data == undefined || !(table_data instanceof Array)) return;
+
+  for (i = start; i < limit; ++i) {
+    var stream = table_data[i];
+    var str = '<tr>';
+    str += '<td>' + (i + 1) + '</td>';
+    str += '<td>' + stream.SrcIp + '</td>';
+
+
+    if (ipCompare_to_private(stream.SrcIp)) {
+      str += '<td>' + "privateIP" + '</td>';
+    }
+    else {
+      str += '<td>' + "NA" + '</td>';
+    }
+
+
+    str += '<td>' + stream.DstIp + '</td>';
+
+    if (ipCompare_to_private(stream.DstIp)) {
+      str += '<td>' + "privateIP" + '</td>';
+    }
+    else {
+      str += '<td>' + "NA" + '</td>';
+    }
+
+
+
+
+    str += '<td>';
+    if (stream.AtoB instanceof Array) {
+      for (j = 0; j < stream.AtoB.length; j++) {
+        let count = stream.AtoB[j].Count;
+        str += count + "<br>";
+      }
+    }else{
+      str += "0" + "<br>";
+    }
+
+    str += '</td>';
+
+    str += '<td>';
+    if (stream.BtoA instanceof Array) {
+      for (j = 0; j < stream.BtoA.length; j++) {
+        var count = stream.BtoA[j].Count;
+        str += count + "<br>";
+      }
+    }else{
+      str += "0" + "<br>";
+    }
+
+    str += '</td>';
+
+    str += '<td>' + "NA" + '</td>';
+    str += '<td>' + "NA" + '</td>';
+
+    str += '<td>';
+    if (stream.AtoB instanceof Array) {
+      for (j = 0; j < stream.AtoB.length; j++) {
+        str += stream.AtoB[j].Freq_Folder + "<br>";
+      }
+    }else{
+      str += "NA" + "<br>";
+    }
+    str += '</td>';
+
+    str += '<td>';
+    if (stream.BtoA instanceof Array) {
+      for (j = 0; j < stream.BtoA.length; j++) {
+        str += stream.BtoA[j].Freq_Folder + "<br>";
+      }
+    }else{
+      str += "NA" + "<br>";
+    }
+    str += '</td>';
+
+    str += '</tr>';
+    table_result.append(str);
+  }
+
+  /**********************************updating the table***************************/
+  $('#table_result').tablesorter().trigger('update');
+  /*******************************************************************************/
+}
+
+
+
+
+
+function stream_data_pair_result_body_evolution_scpc(obj) {
+  var myMap = new Map();
+  for (i = 0; i < obj.IPDetails.length; i++) {
+    var stream = obj.IPDetails[i];
+
+    if (stream.AtoB instanceof Array) {
+      for (j = 0; j < stream.AtoB.length; j++) {
+        if (myMap.get(stream.AtoB[j].Freq_Folder) == undefined) //if key not found
+        {
+          var mySet = new Set();
+          if (stream.BtoA instanceof Array) {
+            for (k = 0; k < stream.BtoA.length; k++) {
+              mySet.add(stream.BtoA[k].Freq_Folder);
+            }
+          }
+          myMap.set(stream.AtoB[j].Freq_Folder, mySet);
+        }
+        else {
+          // var MySet = myMap[stream.AtoB[j].Freq_Folder];
+          if (stream.BtoA instanceof Array) {
+            let newSet = new Set();
+            for (k = 0; k < stream.BtoA.length; k++) {
+              newSet.add(stream.BtoA[k].Freq_Folder);
+            }
+            myMap.set(stream.AtoB[j].Freq_Folder, newSet);
+          }
+        }
+      } //
+    } //if loop ends folders_AB instanceof Array
+    else {
+      continue;
+    }
+  }
+
+  $('#pairs_result tbody').empty();
+  var ptr = "";
+  for (let [key, value] of myMap) {
+    ptr += '<tr>';
+    ptr += '<td>' + key + '</td>';
+    ptr += '<td>';
+    for (val of value) {
+      ptr += val + '<br>';
+    }
+    ptr += '<td>';
+    ptr += '</tr>';
+  }
+  $('#pairs_result tbody').append(ptr);
+}
+
+function stream_data_file_result_body_evolution_scpc(obj) {
+  // set d_num_files here from json
+  $('#file_result tbody').empty();
+
+  if (obj.data_info) {
+    var d_num = obj.data_info.Total_Files_Read;
+    document.getElementById("d_num_files").innerHTML = d_num;
+
+    var dtr = '<tr>';
+    dtr += '<td>'
+    dtr += obj.data_info.filePathFL;
+    dtr += '</td>'
+
+    dtr += '<td>'
+    dtr += obj.data_info.filePathRL;
+    dtr += '</td>'
+
+    dtr += '<td>'
+    dtr += obj.data_info.CreatedAt;
+    dtr += '</td>'
+
+
+    if (obj.data_info.Freq_Files != undefined) {
+      dtr += '<td>'
+      for (j = 0; j < obj.data_info.Freq_Files.length; j++) {
+        dtr += obj.data_info.Freq_Files[j].pcapFile + ' (' + obj.data_info.Freq_Files[j].size + ')' + '<br>';
+      }
+      dtr += '</td>'
+    } else {
+      dtr += '<td>'
+      dtr += "No_files";
+      dtr += '</td>'
+    }
+
+    if (obj.data_info.RL_Files != undefined) {
+      dtr += '<td>'
+      for (j = 0; j < obj.data_info.RL_Files.length; j++) {
+        dtr += obj.data_info.RL_Files[j].pcapFileRl + ' (' + obj.data_info.RL_Files[j].size + ')' + '<br>';
+      }
+      dtr += '</td>'
+    } else {
+      dtr += '<td>'
+      dtr += "No_files";
+      dtr += '</td>'
+    }
+
+    dtr += '</tr>';
+    $('#file_result tbody').append(dtr);
+  }
+}
+
+
+function funct_to_load_two_way_pairs_evolution_scpc(start, limit) // function to load two way data called by load_2_way_streams() function
+{
+  table_result.empty();
+  if (g_data_pcap_evolution_scpc_pairs == undefined || !(g_data_pcap_evolution_scpc_pairs instanceof Array)) return;
+
+  for (i = start; i < limit; ++i) {
+    var stream = g_data_pcap_evolution_scpc_pairs[i];
+
+    var pcap_pair_str = '<tr>';
+    pcap_pair_str += '<td>' + (i + 1) + '</td>';
+    pcap_pair_str += '<td>' + stream.SrcIp + '</td>';
+
+    if (ipCompare_to_private(stream.SrcIp)) {
+      pcap_pair_str += '<td>' + "privateIP" + '</td>';
+    }
+    else {
+      pcap_pair_str += '<td>' + "NA" + '</td>';
+    }
+
+    pcap_pair_str += '<td>' + stream.DstIp + '</td>';
+
+    if (ipCompare_to_private(stream.DstIp)) {
+      pcap_pair_str += '<td>' + "privateIP" + '</td>';
+    }
+    else {
+      pcap_pair_str += '<td>' + "NA" + '</td>';
+    }
+
+
+
+    pcap_pair_str += '<td>';
+    if (stream.AtoB instanceof Array) {
+      for (j = 0; j < stream.AtoB.length; j++) {
+        let count = stream.AtoB[j].Count;
+        pcap_pair_str += count + "<br>";
+
+      }
+    }
+    pcap_pair_str += '</td>';
+
+    pcap_pair_str += '<td>';
+    if (stream.BtoA instanceof Array) {
+      for (j = 0; j < stream.BtoA.length; j++) {
+        let count = stream.BtoA[j].Count;
+        pcap_pair_str += count + "<br>";
+      }
+    }
+
+    pcap_pair_str += '</td>';
+
+    pcap_pair_str += '<td>' + "NA" + '</td>';
+    pcap_pair_str += '<td>' + "NA" + '</td>';
+
+    pcap_pair_str += '<td>';
+
+    if (stream.AtoB instanceof Array) {
+      for (j = 0; j < stream.AtoB.length; j++) {
+        pcap_pair_str += stream.AtoB[j].Freq_Folder + "<br>";
+      }
+    }
+    pcap_pair_str += '</td>';
+
+    pcap_pair_str += '<td>';
+    if (stream.BtoA instanceof Array) {
+      for (j = 0; j < stream.BtoA.length; j++) {
+        pcap_pair_str += stream.BtoA[j].Freq_Folder + "<br>";
+      }
+    }
+    pcap_pair_str += '</td>';
+
+    pcap_pair_str += '</tr>';
+    table_result.append(pcap_pair_str);
+
+  }
+  // 
+}
+
+
+
+
+/////////////////////////////////////////FOR EVOLUTION SCPC ENDS////////////////////////////////////////////////////////////////
 
 
 function set_world_map() {
@@ -265,29 +750,22 @@ function stream_data_pair_result_body(obj) {
   for (i = 0; i < obj.IPDetails.length; i++) {
     var stream = obj.IPDetails[i];
 
-    if (stream.folders_AB instanceof Array) 
-    {
-      for (j = 0; j < stream.folders_AB.length; j++)
-       {
+    if (stream.folders_AB instanceof Array) {
+      for (j = 0; j < stream.folders_AB.length; j++) {
         if (myMap.get(stream.folders_AB[j]) == undefined) //if key not found
         {
           var mySet = new Set();
-          if (stream.folders_BA instanceof Array)
-          {
-            for (k = 0; k < stream.folders_BA.length; k++) 
-            {
+          if (stream.folders_BA instanceof Array) {
+            for (k = 0; k < stream.folders_BA.length; k++) {
               mySet.add(stream.folders_BA[k]);
             }
           }
           myMap.set(stream.folders_AB[j], mySet);
-        } 
-        else 
-        {
+        }
+        else {
           var MySet = myMap[stream.folders_AB[j]];
-          if (stream.folders_BA instanceof Array) 
-          {
-            for (k = 0; k < stream.folders_BA.length; k++) 
-            {
+          if (stream.folders_BA instanceof Array) {
+            for (k = 0; k < stream.folders_BA.length; k++) {
               mySet.add(stream.folders_BA[k]);
             }
             // myMap.set(stream.folders_AB[j] , mySet);
@@ -505,17 +983,31 @@ function load_table_result_next() {
   if (two_way_only == true) {
     if (max_size > next_pairs) {
       limit = limit + rows_per_page;
-      limit = Math.min(g_data_pcap_pairs.length, limit);
-      table_result.empty();
-      funct_to_load_two_way_pairs(next_pairs, limit);
-      $('#p_table_result_info').html((next_pairs + 1) + '-' + limit + '(' + max_size + ')');
+      if (evolution_scpc == true) {
+        limit = Math.min(g_data_pcap_evolution_scpc_pairs.length, limit);
+        table_result.empty();
+        funct_to_load_two_way_pairs_evolution_scpc(next_pairs, limit);
+        $('#p_table_result_info').html((next_pairs + 1) + '-' + limit + '(' + max_size + ')');
+      } else {
+        limit = Math.min(g_data_pcap_pairs.length, limit);
+        table_result.empty();
+        funct_to_load_two_way_pairs(next_pairs, limit);
+        $('#p_table_result_info').html((next_pairs + 1) + '-' + limit + '(' + max_size + ')');
+      }
+
     }
   } else if (max_size > next) {
     limit = limit + rows_per_page;
     limit = Math.min(table_data.length, limit);
     table_result.empty();
-    display_stream_data(next, limit);
-    $('#p_table_result_info').html((next + 1) + '-' + (limit) + '(' + max_size + ')');
+    if (evolution_scpc == true) {
+      display_stream_data_evolution_scpc(next, limit);
+      $('#p_table_result_info').html((next + 1) + '-' + (limit) + '(' + max_size + ')');
+    } else {
+      display_stream_data(next, limit);
+      $('#p_table_result_info').html((next + 1) + '-' + (limit) + '(' + max_size + ')');
+    }
+
   }
 }
 
@@ -536,8 +1028,15 @@ function load_table_result_prev() {
     }
 
     table_result.empty();
-    funct_to_load_two_way_pairs(prev_two_way, limit);
-    $('#p_table_result_info').html((prev_two_way + 1) + '-' + limit + '(' + max_size + ')');
+    if (evolution_scpc == true) {
+      funct_to_load_two_way_pairs_evolution_scpc(prev_two_way, limit);
+      $('#p_table_result_info').html((prev_two_way + 1) + '-' + limit + '(' + max_size + ')');
+    }
+    else {
+      funct_to_load_two_way_pairs(prev_two_way, limit);
+      $('#p_table_result_info').html((prev_two_way + 1) + '-' + limit + '(' + max_size + ')');
+    }
+
   } else {
     if (limit % 100 == 0) {
       prev = limit - 2 * rows_per_page;
@@ -555,8 +1054,14 @@ function load_table_result_prev() {
     }
 
     table_result.empty();
-    display_stream_data(prev, limit);
-    $('#p_table_result_info').html((prev + 1) + '-' + limit + '(' + max_size + ')');
+    if (evolution_scpc == true) {
+      display_stream_data_evolution_scpc(prev, limit);
+      $('#p_table_result_info').html((prev + 1) + '-' + limit + '(' + max_size + ')');
+    } else {
+      display_stream_data(prev, limit);
+      $('#p_table_result_info').html((prev + 1) + '-' + limit + '(' + max_size + ')');
+    }
+
   }
 }
 
@@ -565,12 +1070,18 @@ function load_2_way_streams() {
   $('#btn_reset').removeClass('disabled');
   start = 0;
   two_way_only = true;
-  max_size = g_data_pcap_pairs.length;
-  limit = Math.min(max_size, limit);
-  funct_to_load_two_way_pairs(start, limit);
-  $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
-
-
+  if (evolution_scpc == true) {
+    max_size = g_data_pcap_evolution_scpc_pairs.length;
+    limit = Math.min(max_size, limit);
+    funct_to_load_two_way_pairs_evolution_scpc(start, limit);
+    $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
+  }
+  else {
+    max_size = g_data_pcap_pairs.length;
+    limit = Math.min(max_size, limit);
+    funct_to_load_two_way_pairs(start, limit);
+    $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
+  }
 }
 
 function funct_to_load_two_way_pairs(start, limit) // function to load two way data called by load_2_way_streams() function
@@ -665,8 +1176,13 @@ function load_all_streams() {
   limit = rows_per_page;
   two_way_only = false;
   max_size = table_data.length;
-  display_stream_data(start, limit);
-  $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
+  if (evolution_scpc == true) {
+    display_stream_data_evolution_scpc(start, limit);
+    $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
+  } else {
+    display_stream_data(start, limit);
+    $('#p_table_result_info').html(1 + '-' + limit + '(' + max_size + ')');
+  }
 
 }
 
@@ -707,8 +1223,7 @@ function searchipFunction() {
   }
 }
 
-function save_pairs_info_to_file()
-{
-    $('#btn_save_pairs_info_to_file').addClass('disabled');
-    ws_command.send("save_pairs_");
+function save_pairs_info_to_file() {
+  $('#btn_save_pairs_info_to_file').addClass('disabled');
+  ws_command.send("save_pairs_");
 }

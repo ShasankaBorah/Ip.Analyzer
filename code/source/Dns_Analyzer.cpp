@@ -38,6 +38,8 @@ Dns_Analyzer::~Dns_Analyzer() //default deconstructor
 
 void Dns_Analyzer::initialize()
 {
+	sizePcapFl.clear();
+	sizePcapRl.clear();
 	streams.clear();
 	fl_files_.clear();
 	rl_files_.clear();
